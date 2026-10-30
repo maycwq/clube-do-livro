@@ -9,6 +9,15 @@
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:title" content="a gente tá montando um clube do livro. vem?" />
     <meta property="og:description" content="queremos começar em 2027 com encontros presenciais pra ler de tudo um pouco, descobrir livros que talvez a gente nem escolheria sozinho e ter com quem comentar depois." />
+    <meta property="og:site_name" content="clube do livro" />
+    <meta property="og:url" content="%SITE_URL%/" />
+    <meta property="og:image" content="%SITE_URL%/og.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="convite do clube do livro em roxo, com uma luz quente ao lado: a gente tá montando um clube do livro. vem?" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href="%SITE_URL%/" />
     <meta name="theme-color" content="#fbf9f4" />
     <link rel="icon" href="data:," />
     <link rel="preload" href="/node_modules/@fontsource-variable/fraunces/files/fraunces-latin-full-normal.woff2" as="font" type="font/woff2" crossorigin />
@@ -40,7 +49,7 @@
         </section>
 
         <div class="form-column">
-          <form class="form" id="interesse" method="post" action="/api/responses" novalidate data-consent-version="2026-10">
+          <form class="form" id="interesse" method="post" action="/api/responses" novalidate data-consent-version="v2">
             <section class="block interest">
               <p class="note">ainda estamos acertando os detalhes, então por enquanto é só pra saber quem anima. não é inscrição, tá?</p>
 
@@ -63,7 +72,7 @@
                     <span class="option__label">quero acompanhar a ideia antes de decidir</span>
                   </label>
                 </div>
-                <p class="error" id="interest-error" hidden>escolha uma das opções.</p>
+                <p class="error" id="interest-error" hidden></p>
               </fieldset>
 
               <hr class="divider" />
@@ -92,7 +101,7 @@
                     <span class="option__label">ainda não sei</span>
                   </label>
                 </div>
-                <p class="error" id="format-error" hidden>escolha uma das opções.</p>
+                <p class="error" id="format-error" hidden></p>
               </fieldset>
             </section>
 
@@ -114,14 +123,14 @@
                 <div class="field" data-field="name">
                   <label class="field__label" for="name">como a gente pode te chamar?</label>
                   <input class="field__input" id="name" name="name" type="text" placeholder="nome ou apelido" autocomplete="given-name" maxlength="80" spellcheck="false" required />
-                  <p class="error" id="name-error" hidden>informe como a gente pode te chamar.</p>
+                  <p class="error" id="name-error" hidden></p>
                 </div>
 
                 <div class="field-group">
                   <div class="field" data-field="whatsapp">
                     <label class="field__label" for="whatsapp">seu WhatsApp</label>
                     <input class="field__input" id="whatsapp" name="whatsapp" type="tel" inputmode="tel" placeholder="(31) 99999-9999" autocomplete="tel" aria-describedby="whatsapp-help" required />
-                    <p class="error" id="whatsapp-error" hidden>informe seu WhatsApp com DDD.</p>
+                    <p class="error" id="whatsapp-error" hidden></p>
                   </div>
                   <p class="help" id="whatsapp-help">com DDD. quando tivermos novidades, a gente te chama pra contar os detalhes e saber se você ainda tá a fim. ninguém entra em grupo sem combinar.</p>
                 </div>
@@ -130,9 +139,9 @@
               <div class="submit">
                 <p class="submit__consent">ao enviar, você deixa a gente te chamar pelo WhatsApp sobre o clube. pra parar depois, é só avisar.</p>
                 <button class="button" type="submit" data-label="quero acompanhar o clube" data-sending-label="enviando...">quero acompanhar o clube</button>
-                <p class="submit__sending" role="status" data-text="a resposta está sendo processada. evite enviar novamente."></p>
+                <p class="submit__status visually-hidden" role="status"></p>
                 <div class="failure" role="alert"></div>
-                <p class="submit__privacy">o contato fica só com a gente, pra falar deste clube.</p>
+                <p class="submit__privacy">a gente usa seus dados só pra organizar o clube e entrar em contato sobre ele. <a class="submit__link" href="/privacidade">como usamos seus dados</a></p>
               </div>
 
               <div class="trap" aria-hidden="true">

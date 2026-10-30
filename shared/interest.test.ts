@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatWhatsapp, normalizeName, normalizeWhatsapp, validateSubmission } from './interest.js';
+import { errorFields, formatWhatsapp, normalizeName, normalizeWhatsapp, validateSubmission } from './interest.js';
 
 describe('normalizeWhatsapp', () => {
   it.each([
@@ -50,24 +50,27 @@ describe('normalizeName', () => {
 });
 
 describe('validateSubmission', () => {
+  const submissionId = '3f1c2b4a-8d9e-4f7a-9b6c-1d2e3f4a5b6c';
   const valid = {
+    submissionId,
     interest: 'talvez',
     format: 'os-dois',
     name: ' Ana ',
     whatsapp: '(31) 98765-4321',
-    consentVersion: '2026-10',
+    consentVersion: 'v2',
   };
 
   it('returns the normalized submission, with the test invite off by default', () => {
     expect(validateSubmission(valid)).toEqual({
       ok: true,
       value: {
+        submissionId,
         name: 'Ana',
         whatsapp: '+5531987654321',
         interest: 'talvez',
         format: 'os-dois',
         testInvite: false,
-        consentVersion: '2026-10',
+        consentVersion: 'v2',
       },
     });
   });
@@ -77,30 +80,48 @@ describe('validateSubmission', () => {
     expect(result.ok && result.value.testInvite).toBe(true);
   });
 
-  it('lists every field that needs fixing, in page order', () => {
-    expect(validateSubmission({ consentVersion: '2026-10' })).toEqual({
+  it('says what is wrong with each field', () => {
+    expect(validateSubmission({ consentVersion: 'v2' })).toEqual({
       ok: false,
-      fields: ['interest', 'format', 'name', 'whatsapp'],
+      errors: { interest: 'missing', format: 'missing', name: 'missing', whatsapp: 'missing' },
     });
     expect(validateSubmission({ ...valid, name: '   ', whatsapp: '123' })).toEqual({
       ok: false,
-      fields: ['name', 'whatsapp'],
+      errors: { name: 'missing', whatsapp: 'invalid' },
     });
   });
 
-  it('rejects options that are not on the page', () => {
-    expect(validateSubmission({ ...valid, interest: 'claro' })).toEqual({ ok: false, fields: ['interest'] });
-    expect(validateSubmission({ ...valid, format: 'presencial ' })).toEqual({ ok: false, fields: ['format'] });
+  it('tells an empty WhatsApp from one that can be fixed', () => {
+    const whatsapp = (value: unknown) => {
+      const result = validateSubmission({ ...valid, whatsapp: value });
+      return result.ok ? null : result.errors.whatsapp;
+    };
+    expect(whatsapp('')).toBe('missing');
+    expect(whatsapp('   ')).toBe('missing');
+    expect(whatsapp(undefined)).toBe('missing');
+    expect(whatsapp('99999-9999')).toBe('invalid');
+    expect(whatsapp('(20) 99999-9999')).toBe('invalid');
   });
 
-  it('rejects names longer than 80 characters', () => {
-    expect(validateSubmission({ ...valid, name: 'a'.repeat(81) })).toEqual({ ok: false, fields: ['name'] });
+  it('rejects options that are not on the page', () => {
+    expect(validateSubmission({ ...valid, interest: 'claro' })).toEqual({ ok: false, errors: { interest: 'invalid' } });
+    expect(validateSubmission({ ...valid, format: 'presencial ' })).toEqual({ ok: false, errors: { format: 'invalid' } });
+  });
+
+  it('takes names up to 80 characters', () => {
+    expect(validateSubmission({ ...valid, name: 'a'.repeat(81) })).toEqual({ ok: false, errors: { name: 'too_long' } });
     expect(validateSubmission({ ...valid, name: 'a'.repeat(80) }).ok).toBe(true);
   });
 
-  it('treats an unknown consent version or a non-boolean opt-in as a malformed request', () => {
-    expect(validateSubmission({ ...valid, consentVersion: '2020-01' })).toEqual({ ok: false, fields: [] });
-    expect(validateSubmission({ ...valid, consentVersion: undefined })).toEqual({ ok: false, fields: [] });
-    expect(validateSubmission({ ...valid, testInvite: 'sim' })).toEqual({ ok: false, fields: [] });
+  it('treats an unknown consent version, a missing submission id or a non-boolean opt-in as malformed', () => {
+    expect(validateSubmission({ ...valid, consentVersion: 'v1' })).toEqual({ ok: false, errors: {} });
+    expect(validateSubmission({ ...valid, consentVersion: undefined })).toEqual({ ok: false, errors: {} });
+    expect(validateSubmission({ ...valid, submissionId: undefined })).toEqual({ ok: false, errors: {} });
+    expect(validateSubmission({ ...valid, submissionId: '1' })).toEqual({ ok: false, errors: {} });
+    expect(validateSubmission({ ...valid, testInvite: 'sim' })).toEqual({ ok: false, errors: {} });
+  });
+
+  it('lists fields with errors in page order', () => {
+    expect(errorFields({ whatsapp: 'invalid', interest: 'missing' })).toEqual(['interest', 'whatsapp']);
   });
 });

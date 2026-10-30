@@ -1,0 +1,131 @@
+/* "como usamos seus dados": a reading page in the form's type scale, with the
+   opening light at the top. */
+
+.notice {
+  position: relative;
+  isolation: isolate;
+  padding: 30px 24px 0;
+}
+
+.notice__light {
+  top: -71px;
+  left: calc((min(100vw, 390px) - 390px) * 0.77);
+  width: 500px;
+  height: 532px;
+  background-image: url('../assets/light/opening-mobile.svg');
+}
+
+.notice__title {
+  margin-top: 15px;
+  font-family: var(--fonte-titulo);
+  font-variation-settings: var(--fraunces-eixos);
+  font-weight: 700;
+  font-size: clamp(38px, 38px + (100vw - 320px) / 14, 43px);
+  line-height: clamp(42px, 42px + (100vw - 320px) * 4 / 70, 46px);
+}
+
+.notice__lead {
+  margin-top: 15px;
+  font-size: 17px;
+  line-height: 25px;
+}
+
+.notice__section {
+  margin-top: 34px;
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.notice__section h2 {
+  margin: 0 0 12px;
+  font-family: var(--fonte-titulo);
+  font-variation-settings: var(--fraunces-eixos);
+  font-weight: 600;
+  font-size: clamp(23px, 23px + (100vw - 320px) / 70, 24px);
+  line-height: clamp(28px, 28px + (100vw - 320px) / 70, 29px);
+}
+
+.notice__section p + p,
+.notice__section ul + p {
+  margin-top: 12px;
+}
+
+.notice__section ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.notice__section li + li {
+  margin-top: 6px;
+}
+
+.notice__section li::marker {
+  color: var(--acento);
+}
+
+/* Information the organizers still have to provide. The build refuses to
+   publish the page while any of these remain (vite.config.ts). */
+.pending {
+  padding: 0 4px;
+  outline: 1px dashed var(--erro-texto);
+  background: var(--papel-quente);
+  color: var(--erro-texto);
+  font-weight: 500;
+}
+
+.notice__back {
+  margin-top: 40px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--ameixa);
+}
+
+.notice__back a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.notice__back a:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+.notice__signature {
+  max-width: 390px;
+  margin-inline: auto;
+}
+
+@media (min-width: 1200px) {
+  .view.notice {
+    max-width: 650px;
+    padding: 60px 0 0;
+  }
+
+  .notice__light {
+    left: 150px;
+  }
+
+  .notice__title {
+    font-size: 60px;
+    line-height: 63px;
+  }
+
+  .notice__lead {
+    font-size: 18px;
+    line-height: 28px;
+  }
+
+  .notice__section h2 {
+    font-size: 27px;
+    line-height: 33px;
+  }
+
+  .notice__signature {
+    max-width: 650px;
+    padding: 40px 0 60px;
+  }
+}

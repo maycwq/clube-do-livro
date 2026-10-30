@@ -10,7 +10,7 @@ const db = databaseUrl ? createNeonDb(databaseUrl) : null;
 export async function POST(request: Request): Promise<Response> {
   if (!db || !databaseUrl) {
     console.error('DATABASE_URL is not set');
-    return Response.json({ error: 'unavailable' }, { status: 503, headers: { 'cache-control': 'no-store' } });
+    return Response.json({ error: 'not_stored' }, { status: 503, headers: { 'cache-control': 'no-store' } });
   }
   // The IP hashes only need a key that stays private and stable for an hour;
   // the connection string already is one, so there's no extra secret to set.

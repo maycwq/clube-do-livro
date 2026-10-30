@@ -5,17 +5,28 @@ export type HandlerOptions = {
   db: Db;
   /** Key for hashing client IPs before they touch the database. */
   secret: string;
+  /** Requests per client per window; RATE_LIMIT unless a local server sets another. */
+  rateLimit?: number;
 };
 
 const MAX_BODY_BYTES = 4096;
 
 /**
- * POST /api/responses. Answers 200 only after the response is stored.
+ * POST /api/responses. Answers 200 only after the submission is recorded,
+ * with the same body whatever was recorded (see SaveOutcome), so the answer
+ * never tells whether a number is already here.
+ *
+ * Failures say what is known: 503 not_stored when nothing was written, 504
+ * unconfirmed when the database may have finished without us hearing back.
+ * Retrying is safe in both cases: the submission id makes it idempotent.
  *
  * Nothing from the request body is ever logged: errors are reported by
  * code only, so phone numbers and names don't end up in platform logs.
  */
-export async function handleSubmission(request: Request, { db, secret }: HandlerOptions): Promise<Response> {
+export async function handleSubmission(
+  request: Request,
+  { db, secret, rateLimit = RATE_LIMIT.requests }: HandlerOptions,
+): Promise<Response> {
   if (request.method !== 'POST') {
     return json({ error: 'method_not_allowed' }, 405, { allow: 'POST' });
   }
@@ -48,9 +59,10 @@ export async function handleSubmission(request: Request, { db, secret }: Handler
     return json({ ok: true }, 200);
   }
 
+  let writing = false;
   try {
     const requests = await registerRequest(db, await clientKey(request, secret));
-    if (requests > RATE_LIMIT.requests) {
+    if (requests > rateLimit) {
       return json({ error: 'too_many_requests' }, 429, {
         'retry-after': String(RATE_LIMIT.windowMinutes * 60),
       });
@@ -58,16 +70,22 @@ export async function handleSubmission(request: Request, { db, secret }: Handler
 
     const result = validateSubmission(body);
     if (!result.ok) {
-      return result.fields.length > 0
-        ? json({ error: 'invalid', fields: result.fields }, 422)
+      return Object.keys(result.errors).length > 0
+        ? json({ error: 'invalid', fields: result.errors }, 422)
         : json({ error: 'bad_request' }, 400);
     }
 
+    writing = true;
     await saveResponse(db, result.value);
     return json({ ok: true }, 200);
   } catch (error) {
-    console.error('response not stored', { code: errorCode(error) });
-    return json({ error: 'unavailable' }, 503);
+    const code = errorCode(error);
+    // Postgres reports errors with a SQLSTATE code, and a failed statement is
+    // rolled back. Without one (a dropped connection, a timeout) the write may
+    // or may not have happened.
+    const known = !writing || /^[0-9A-Z]{5}$/.test(code);
+    console.error(known ? 'response not stored' : 'response not confirmed', { code });
+    return known ? json({ error: 'not_stored' }, 503) : json({ error: 'unconfirmed' }, 504);
   }
 }
 

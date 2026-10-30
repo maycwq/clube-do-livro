@@ -27,6 +27,22 @@
   }
 }
 
+/* rodapé / assinatura editorial */
+.signature {
+  padding: 40px 24px 44px;
+  font-size: 12px;
+  line-height: 17px;
+  font-weight: 500;
+  text-align: right;
+  color: var(--texto-suave);
+}
+
+@media (min-width: 1200px) {
+  .signature {
+    padding: 24px 0 2px;
+  }
+}
+
 /* Light masses ----------------------------------------------------------- */
 
 /* Each group is one SVG exported from the file, blur included. The static
@@ -147,8 +163,11 @@
     color: var(--branco);
   }
 
+  /* 16px lower than in the frame: there the bright edge of the light sits
+     under "comentar" at 3:1; here the proposal stays above 4.5:1, even at
+     rest, and the composition is the same. */
   .opening__light {
-    top: 474px;
+    top: 490px;
     left: 145px;
     width: 523px;
     height: 432px;

@@ -275,7 +275,7 @@
 }
 
 .field__input[aria-invalid='true'] {
-  border-color: var(--cores-marca-highlight);
+  border-color: var(--borda-campo-erro);
 }
 
 /* The focus state is a 1.5px border in the primary color. */
@@ -322,7 +322,9 @@
   background: var(--cores-marca-primaria);
   color: var(--cores-texto-principal);
   font-weight: 700;
-  font-size: clamp(16px, 16px + (100vw - 320px) * 3 / 70, 19px);
+  /* 19px at every width: the 320 frame's 16px would need 4.5:1 against the
+     primary color, and this pair only reaches 3.8:1 (enough for large text). */
+  font-size: 19px;
   line-height: 1.4;
   white-space: nowrap;
   cursor: pointer;
@@ -337,14 +339,7 @@
   cursor: progress;
 }
 
-/* Live regions stay in the page and only take space when they have text. */
-.submit__sending:not(:empty) {
-  margin-top: 12px;
-  font-size: 13px;
-  line-height: 17.16px;
-  color: var(--texto-suave);
-}
-
+/* The failure alert stays in the page and only takes space when it has text. */
 .failure:not(:empty) {
   display: flex;
   flex-direction: column;
@@ -375,6 +370,19 @@
   color: var(--texto-suave);
 }
 
+.submit__link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.submit__link:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
 /* Off-screen field that only bots fill in. */
 .trap {
   position: absolute;
@@ -382,15 +390,6 @@
   width: 1px;
   height: 1px;
   overflow: hidden;
-}
-
-.signature {
-  padding: 40px 24px 44px;
-  font-size: 12px;
-  line-height: 17px;
-  font-weight: 500;
-  text-align: right;
-  color: var(--texto-suave);
 }
 
 /* 320 frame ---------------------------------------------------------------- */
@@ -508,10 +507,8 @@
 
   .button {
     min-height: 67px;
-    font-size: 19px;
   }
 
-  .submit__sending:not(:empty),
   .failure:not(:empty),
   .submit__privacy {
     margin-top: 13px;
@@ -519,10 +516,6 @@
 
   .submit__privacy {
     min-height: 25px;
-  }
-
-  .signature {
-    padding: 24px 0 2px;
   }
 }
 

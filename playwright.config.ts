@@ -7,11 +7,12 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   reporter: 'list',
+  expect: { timeout: 10_000 },
   use: { baseURL: 'http://localhost:5174' },
   webServer: {
     command: 'npm run dev -- --port 5174 --strictPort',
     url: 'http://localhost:5174',
-    env: { LOCAL_DB_DIR: 'memory://', DATABASE_URL: '' },
+    env: { LOCAL_DB_DIR: 'memory://', DATABASE_URL: '', LOCAL_RATE_LIMIT: '10000' },
     reuseExistingServer: false,
   },
   projects: [
