@@ -1,0 +1,226 @@
+/* Compact: the 390 × 844 frame. The closing lines sit at the bottom of the
+   screen; everything above keeps the frame's spacing. */
+
+.done-view {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding-bottom: 11px;
+}
+
+@media (min-width: 640px) and (max-width: 1199px) {
+  .done-view {
+    min-height: calc(100svh - 52px);
+  }
+}
+
+.done__panel {
+  position: relative;
+  isolation: isolate;
+  flex: none;
+  height: 182px;
+  padding: 29px 24px 0;
+  overflow-x: visible;
+  overflow-y: clip;
+}
+
+/* regra editorial / confirma */
+.done__panel::after {
+  content: '';
+  position: absolute;
+  top: 148px;
+  right: 24px;
+  left: 24px;
+  height: 2px;
+  background: var(--acento);
+}
+
+/* Same anchoring as the opening light (layout.css). */
+.done__light {
+  top: -98px;
+  left: calc((min(100vw, 390px) - 390px) * 0.77);
+  width: 477px;
+  height: 302px;
+  background-image: url('../assets/light/confirmation-mobile.svg');
+}
+
+.done__identity {
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 700;
+  color: var(--ameixa);
+}
+
+.done__meta {
+  margin-top: 18px;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--ameixa);
+}
+
+.done__title {
+  min-height: 74px;
+  margin: 36px 24px 0;
+  font-family: var(--fonte-titulo);
+  font-variation-settings: var(--fraunces-eixos);
+  font-weight: 700;
+  font-size: 58px;
+  line-height: 64px;
+}
+
+.done__title:focus {
+  outline: none;
+}
+
+.done__content {
+  display: flex;
+  flex-direction: column;
+  padding: 25px 24px 0;
+}
+
+.done__thanks {
+  font-size: 17px;
+  line-height: 25px;
+}
+
+.done__divider {
+  margin-top: 124px;
+  background: var(--borda-divisoria);
+}
+
+.done__status {
+  min-height: 75px;
+  margin-top: 27px;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--texto-suave);
+}
+
+/* mensagem condicional / teste digital / mostrar somente com opt-in */
+.done__test-invite {
+  margin-top: 38px;
+  padding: 11px 19px 13px 14px;
+  background: var(--papel-quente);
+  font-size: 13px;
+  line-height: 19px;
+  font-weight: 500;
+  color: var(--ameixa);
+}
+
+.done__closing {
+  margin-top: auto;
+  padding: 40px 24px 2px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--ameixa);
+}
+
+.done-view .signature {
+  padding: 22px 24px 2px;
+}
+
+/* Wide: the 1440 × 900 frame. Panel, title and closing share the first
+   grid cell; the panel keeps the frame's 780px. */
+
+@media (min-width: 1200px) {
+  .done-view {
+    display: grid;
+    grid-template-columns: 560px minmax(0, 650px);
+    grid-template-rows: auto auto;
+    column-gap: clamp(60px, 12.5vw - 90px, 90px);
+    align-items: start;
+    min-height: 0;
+  }
+
+  .done__panel {
+    grid-area: 1 / 1;
+    height: 780px;
+    padding: 54px 47px 0;
+    overflow: hidden;
+    border-radius: 48px;
+    background: var(--ameixa);
+  }
+
+  .done__panel::after {
+    content: none;
+  }
+
+  .done__light {
+    top: 258px;
+    left: 145px;
+    width: 523px;
+    height: 432px;
+    background-image: url('../assets/light/atmosphere-confirmation.svg');
+  }
+
+  .done__identity {
+    min-height: 22px;
+    font-size: 13px;
+    line-height: 20px;
+    white-space: pre;
+    color: var(--papel-quente);
+  }
+
+  .done__title {
+    position: relative;
+    grid-area: 1 / 1;
+    min-height: 113px;
+    margin: 116px 47px 0;
+    font-size: 76px;
+    line-height: 85px;
+    color: var(--branco);
+  }
+
+  .done__closing {
+    position: relative;
+    grid-area: 1 / 1;
+    margin: 702px 47px 0;
+    padding: 0 0 3px;
+    font-size: 16px;
+    line-height: 24px;
+    color: var(--papel-quente);
+  }
+
+  .done__content {
+    grid-area: 1 / 2;
+    gap: 30px;
+    padding: 90px 0 0;
+  }
+
+  .done__thanks {
+    font-size: 18px;
+    line-height: 28px;
+  }
+
+  .done__lead {
+    display: block;
+    min-height: 52px;
+    margin-bottom: 30px;
+    font-family: var(--fonte-titulo);
+    font-variation-settings: var(--fraunces-eixos);
+    font-weight: 600;
+    font-size: 36px;
+    line-height: 45px;
+  }
+
+  .done__divider,
+  .done__status,
+  .done__test-invite {
+    margin-top: 0;
+  }
+
+  .done__status {
+    min-height: 55px;
+    font-size: 15px;
+    line-height: 23px;
+  }
+
+  .done-view .signature {
+    grid-area: 2 / 2;
+    margin-top: 3px;
+    padding: 0;
+  }
+}

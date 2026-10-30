@@ -1,0 +1,27 @@
+:root {
+  /* Figma variables, named after their path */
+  --cores-fundo-superficie: #fbf9f4;
+  --cores-texto-principal: #2b2724;
+  --cores-borda-sutil: #efe8e1;
+  --cores-marca-primaria: #c96250;
+  --cores-marca-highlight: #ec6b73;
+  --olue-beige-chalk-800: #564f48;
+  --raio-full: 9999px;
+
+  /* Values the frames use directly, without a variable behind them */
+  --ameixa: #513e4b; /* identity, overlines, the desktop panel */
+  --texto-suave: #6d625d; /* notes, help, placeholders, values */
+  --acento: #c96050; /* radio, checkbox, editorial rules */
+  --papel-quente: #f6e7dc; /* selected option, failure and opt-in notes, text on the panel */
+  --borda-campo: #e8d8d4;
+  --borda-campo-preenchido: #c8b9b6;
+  --borda-divisoria: #e6ded5;
+  --erro-texto: #a33c42;
+  --erro-opcao: #a44040;
+  --branco: #ffffff;
+
+  --fonte-titulo: 'Fraunces Variable', Georgia, serif;
+  --fonte-texto: 'Satoshi', system-ui, sans-serif;
+  /* Fraunces as set in the file: no soft corners, wonky letters on */
+  --fraunces-eixos: 'SOFT' 0, 'WONK' 1;
+}

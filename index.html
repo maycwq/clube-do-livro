@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>clube do livro</title>
+    <meta name="description" content="queremos começar em 2027 com encontros presenciais pra ler de tudo um pouco, descobrir livros que talvez a gente nem escolheria sozinho e ter com quem comentar depois." />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:title" content="a gente tá montando um clube do livro. vem?" />
+    <meta property="og:description" content="queremos começar em 2027 com encontros presenciais pra ler de tudo um pouco, descobrir livros que talvez a gente nem escolheria sozinho e ter com quem comentar depois." />
+    <meta name="theme-color" content="#fbf9f4" />
+    <link rel="icon" href="data:," />
+    <link rel="preload" href="/node_modules/@fontsource-variable/fraunces/files/fraunces-latin-full-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/src/assets/fonts/satoshi/Satoshi-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/src/assets/fonts/satoshi/Satoshi-Medium.woff2" as="font" type="font/woff2" crossorigin />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <div class="page">
+      <main class="view form-view" id="formulario">
+        <section class="opening" aria-labelledby="convite">
+          <div class="light opening__light" aria-hidden="true"></div>
+
+          <p class="opening__meta only-compact">
+            <span class="opening__name">clube do livro</span>
+            <span class="opening__year">2027 / em construção</span>
+          </p>
+          <p class="opening__rubric only-wide">clube do livro     /     2027</p>
+
+          <h1 class="opening__headline" id="convite">
+            a gente tá<br />
+            montando<br class="only-wide" /> um<br class="only-compact" />
+            clube<br class="only-wide" /> do livro.<br />
+            vem?
+          </h1>
+          <p class="opening__proposal">queremos começar em 2027 com encontros presenciais pra ler de tudo um pouco, descobrir livros que talvez a gente nem escolheria sozinho e ter com quem comentar depois.</p>
+          <p class="opening__context">a ideia é se encontrar uma vez por mês. encontros online também são uma possibilidade pra mais pra frente.</p>
+          <p class="opening__epilogue only-wide">um convite primeiro. as inscrições ficam pra depois.</p>
+        </section>
+
+        <div class="form-column">
+          <form class="form" id="interesse" method="post" action="/api/responses" novalidate data-consent-version="2026-10">
+            <section class="block interest">
+              <p class="note">ainda estamos acertando os detalhes, então por enquanto é só pra saber quem anima. não é inscrição, tá?</p>
+
+              <fieldset class="question" data-field="interest">
+                <legend class="question__title">quando o clube começar, você teria vontade de participar?</legend>
+                <div class="options">
+                  <label class="option">
+                    <input class="option__input" type="radio" name="interest" value="sim" required />
+                    <span class="option__indicator" aria-hidden="true"></span>
+                    <span class="option__label">sim, eu toparia</span>
+                  </label>
+                  <label class="option">
+                    <input class="option__input" type="radio" name="interest" value="talvez" required />
+                    <span class="option__indicator" aria-hidden="true"></span>
+                    <span class="option__label">talvez, depende de como funcionar</span>
+                  </label>
+                  <label class="option">
+                    <input class="option__input" type="radio" name="interest" value="acompanhar" required />
+                    <span class="option__indicator" aria-hidden="true"></span>
+                    <span class="option__label">quero acompanhar a ideia antes de decidir</span>
+                  </label>
+                </div>
+                <p class="error" id="interest-error" hidden>escolha uma das opções.</p>
+              </fieldset>
+
+              <hr class="divider" />
+
+              <fieldset class="question" data-field="format">
+                <legend class="question__title">pensando nos encontros, de quais você teria vontade e conseguiria participar?</legend>
+                <div class="options">
+                  <label class="option">
+                    <input class="option__input" type="radio" name="format" value="presencial" required />
+                    <span class="option__indicator" aria-hidden="true"></span>
+                    <span class="option__label">presenciais em ipatinga</span>
+                  </label>
+                  <label class="option">
+                    <input class="option__input" type="radio" name="format" value="online" required />
+                    <span class="option__indicator" aria-hidden="true"></span>
+                    <span class="option__label">online, se acontecerem</span>
+                  </label>
+                  <label class="option">
+                    <input class="option__input" type="radio" name="format" value="os-dois" required />
+                    <span class="option__indicator" aria-hidden="true"></span>
+                    <span class="option__label">dos dois formatos</span>
+                  </label>
+                  <label class="option">
+                    <input class="option__input" type="radio" name="format" value="nao-sei" required />
+                    <span class="option__indicator" aria-hidden="true"></span>
+                    <span class="option__label">ainda não sei</span>
+                  </label>
+                </div>
+                <p class="error" id="format-error" hidden>escolha uma das opções.</p>
+              </fieldset>
+            </section>
+
+            <section class="block interlude" aria-labelledby="teste-titulo">
+              <p class="interlude__overline">um extra, se bater curiosidade</p>
+              <h2 class="interlude__title" id="teste-titulo">tem outra coisa em construção.</h2>
+              <p class="interlude__text" id="teste-texto">a gente também tá criando uma experiência digital pro clube. quer receber um convite pra testar quando tiver algo pronto?</p>
+              <label class="check">
+                <input class="check__input" type="checkbox" name="testInvite" value="sim" aria-describedby="teste-texto" />
+                <span class="check__box" aria-hidden="true"></span>
+                <span class="check__label">sim, me chama pra testar também</span>
+              </label>
+            </section>
+
+            <section class="block contact" aria-labelledby="contato-titulo">
+              <div class="contact__fields">
+                <h2 class="contact__title" id="contato-titulo">pra gente se falar depois</h2>
+
+                <div class="field" data-field="name">
+                  <label class="field__label" for="name">como a gente pode te chamar?</label>
+                  <input class="field__input" id="name" name="name" type="text" placeholder="nome ou apelido" autocomplete="given-name" maxlength="80" spellcheck="false" required />
+                  <p class="error" id="name-error" hidden>informe como a gente pode te chamar.</p>
+                </div>
+
+                <div class="field-group">
+                  <div class="field" data-field="whatsapp">
+                    <label class="field__label" for="whatsapp">seu WhatsApp</label>
+                    <input class="field__input" id="whatsapp" name="whatsapp" type="tel" inputmode="tel" placeholder="(31) 99999-9999" autocomplete="tel" aria-describedby="whatsapp-help" required />
+                    <p class="error" id="whatsapp-error" hidden>informe seu WhatsApp com DDD.</p>
+                  </div>
+                  <p class="help" id="whatsapp-help">com DDD. quando tivermos novidades, a gente te chama pra contar os detalhes e saber se você ainda tá a fim. ninguém entra em grupo sem combinar.</p>
+                </div>
+              </div>
+
+              <div class="submit">
+                <p class="submit__consent">ao enviar, você deixa a gente te chamar pelo WhatsApp sobre o clube. pra parar depois, é só avisar.</p>
+                <button class="button" type="submit" data-label="quero acompanhar o clube" data-sending-label="enviando...">quero acompanhar o clube</button>
+                <p class="submit__sending" role="status" data-text="a resposta está sendo processada. evite enviar novamente."></p>
+                <div class="failure" role="alert"></div>
+                <p class="submit__privacy">o contato fica só com a gente, pra falar deste clube.</p>
+              </div>
+
+              <div class="trap" aria-hidden="true">
+                <label for="trap">não preencha este campo</label>
+                <input id="trap" name="trap" type="text" tabindex="-1" autocomplete="off" />
+              </div>
+            </section>
+          </form>
+
+          <footer class="signature">olue © 2026</footer>
+        </div>
+      </main>
+
+      <main class="view done-view" id="confirmacao" hidden>
+        <div class="done__panel">
+          <div class="light done__light" aria-hidden="true"></div>
+          <p class="done__identity">clube do livro<span class="only-wide">     /     2027</span></p>
+          <p class="done__meta only-compact">2027 / em construção</p>
+        </div>
+        <h1 class="done__title" tabindex="-1">anotado<span class="only-compact">!</span><span class="only-wide">.</span></h1>
+
+        <div class="done__content">
+          <p class="done__thanks"><span class="done__lead">valeu por responder.</span> a gente tá acertando os detalhes e te chama no WhatsApp quando tiver novidades.</p>
+          <hr class="divider done__divider" />
+          <p class="done__status">isso ainda não é inscrição nem entrada em grupo. a decisão de participar fica pra depois.</p>
+          <p class="done__test-invite" hidden>também anotamos seu interesse em testar a experiência digital.</p>
+        </div>
+
+        <p class="done__closing">a gente se fala.</p>
+        <footer class="signature">olue © 2026</footer>
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+node_modules
+dist
+.data
+.env*.local
+.vercel
+*.local
+.DS_Store
+# Satoshi is downloaded by scripts/fetch-satoshi.mjs: its license allows
+# self-hosting it on our own site but not redistributing it in a repository.
+src/assets/fonts/satoshi
+test-results
+playwright-report

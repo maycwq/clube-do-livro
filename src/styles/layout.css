@@ -1,0 +1,202 @@
+/* Two compositions. Compact (up to 1199px): one column, at most 390px wide,
+   following the 390 frames, with the 320 frame's sizes below 360px and the
+   768 frame's top and bottom space from 640px. Wide (1200px and up): the
+   editorial panel next to the form, following the 1440 frames; margins and
+   gap shrink linearly down to 1200px. */
+
+.page {
+  overflow-x: clip;
+}
+
+.view {
+  max-width: 390px;
+  margin-inline: auto;
+}
+
+@media (min-width: 640px) and (max-width: 1199px) {
+  .page {
+    padding-block: 30px 22px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .view {
+    --page-margin: clamp(40px, 12.5vw - 110px, 70px);
+    max-width: 1440px;
+    padding: 60px var(--page-margin);
+  }
+}
+
+/* Light masses ----------------------------------------------------------- */
+
+/* Each group is one SVG exported from the file, blur included. The static
+   composition is the design; motion only nudges the whole group a few
+   pixels and stops under prefers-reduced-motion. */
+.light {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  --drift-x: -3px;
+  --drift-y: 2.5px;
+}
+
+@media (min-width: 1200px) {
+  .light {
+    --drift-x: -7px;
+    --drift-y: 5px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .light {
+    animation: light-drift 14s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+}
+
+@keyframes light-drift {
+  to {
+    transform: translate3d(var(--drift-x), var(--drift-y), 0);
+  }
+}
+
+/* Opening: the top of the page on compact, the sticky panel on wide ------ */
+
+.opening {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 30px 24px 34px;
+}
+
+/* At 320 the 390 composition moves about 54px to the left: anchored in
+   between the two frames, it lands on both. */
+.opening__light {
+  top: -71px;
+  left: calc((min(100vw, 390px) - 390px) * 0.77);
+  width: 500px;
+  height: 532px;
+  background-image: url('../assets/light/opening-mobile.svg');
+}
+
+.opening__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 24px;
+  line-height: 18px;
+  color: var(--ameixa);
+}
+
+.opening__name {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.opening__year {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.opening__headline {
+  padding-bottom: 7px;
+  font-family: var(--fonte-titulo);
+  font-variation-settings: var(--fraunces-eixos);
+  font-weight: 700;
+  font-size: clamp(38px, 38px + (100vw - 320px) / 14, 43px);
+  line-height: clamp(42px, 42px + (100vw - 320px) * 4 / 70, 46px);
+}
+
+.opening__proposal {
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.opening__context {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--ameixa);
+}
+
+@media (min-width: 1200px) {
+  .form-view {
+    display: grid;
+    grid-template-columns: 560px minmax(0, 650px);
+    column-gap: clamp(48px, 12.5vw - 102px, 78px);
+    align-items: start;
+  }
+
+  /* 940px tall, as in the frame. When the window is shorter than the panel
+     plus its margins, it sticks by its bottom edge instead of its top, so
+     the whole composition stays reachable. */
+  .opening {
+    position: sticky;
+    top: min(60px, 100vh - 1000px);
+    height: 940px;
+    gap: 22px;
+    padding: 45px 43px;
+    overflow: hidden;
+    border-radius: 48px;
+    background: var(--ameixa);
+    color: var(--branco);
+  }
+
+  .opening__light {
+    top: 474px;
+    left: 145px;
+    width: 523px;
+    height: 432px;
+    background-image: url('../assets/light/atmosphere-form.svg');
+  }
+
+  .opening__rubric {
+    min-height: 22px;
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 700;
+    white-space: pre;
+    color: var(--papel-quente);
+  }
+
+  .opening__headline {
+    padding-bottom: 20px;
+    font-size: 60px;
+    line-height: 63px;
+  }
+
+  .opening__proposal {
+    max-width: 469px;
+    font-size: 18px;
+    line-height: 27px;
+  }
+
+  .opening__context {
+    max-width: 315px;
+    font-size: 15px;
+    line-height: 23px;
+    color: var(--papel-quente);
+  }
+
+  .opening__epilogue {
+    position: absolute;
+    top: 868px;
+    left: 43px;
+    width: 445px;
+    font-size: 13px;
+    line-height: 20px;
+    color: var(--papel-quente);
+  }
+
+  .form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding-block: 6px 40px;
+  }
+}
