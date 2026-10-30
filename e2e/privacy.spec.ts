@@ -10,7 +10,7 @@ test('the privacy line links to how the data is used, and coming back keeps the 
   await page.getByRole('link', { name: 'como usamos seus dados' }).click();
   await expect(page).toHaveURL(/\/privacidade$/);
   await expect(page.getByRole('heading', { level: 1, name: 'como usamos seus dados' })).toBeVisible();
-  for (const section of ['quem organiza', 'o que a gente guarda e pra quê', 'contato sobre o clube e convite pro teste', 'onde ficam e quem vê', 'por quanto tempo', 'pra parar, corrigir ou apagar']) {
+  for (const section of ['quem organiza', 'por que pedimos seu nome e seu WhatsApp', 'o convite pro teste digital', 'por quanto tempo', 'pra parar, corrigir ou apagar']) {
     await expect(page.getByRole('heading', { level: 2, name: section })).toBeVisible();
   }
 
@@ -30,9 +30,5 @@ test('opened on its own, "voltar pro formulário" goes to the form', async ({ pa
 test('information still missing is marked as pending, never shown as real', async ({ page }) => {
   await page.goto('/privacidade');
   const pending = page.locator('[data-pending]');
-  await expect(pending).toHaveText([
-    '[IDENTIFICAÇÃO DOS RESPONSÁVEIS]',
-    '[CRITÉRIO DE RETENÇÃO APROVADO]',
-    '[CANAL DE CONTATO PARA PRIVACIDADE]',
-  ]);
+  await expect(pending).toHaveText(['[IDENTIFICAÇÃO DOS RESPONSÁVEIS]', '[CANAL DE CONTATO PARA PRIVACIDADE]']);
 });

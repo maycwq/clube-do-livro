@@ -51,11 +51,13 @@ Where the file falls short of WCAG 2.2 AA, the implementation moves as little as
 
 - **What is stored and why** is in the README: the answers, the number in E.164, the consent version and dates. No IP, user agent, cookies or analytics.
 - **The consent record is the exact text shown**: the sentence next to the button, the privacy line, the test invite and the whole privacy notice, stored once per version in `consent_texts`; each response and change request points to its version. `v1` (the first wording) was never published; `v2` adds the notice. A version can be corrected while nothing points to it; after that, a change means a new version.
-- **The form can't be published with the notice incomplete.** The production build stops while any pending item is left; a private preview can be forced with `ALLOW_PENDING_PRIVACY=1`, and the items then show as visibly pending, never as information.
+- **The privacy notice is short and plain.** Five parts: who organizes, why the form asks for a name and a WhatsApp, how the test invite works, how long answers are kept and how to stop, correct or delete. It covers what is true for this form, without legal boilerplate.
+- **Retention follows the club, not a legal deadline**: answers are kept only while the club is being organized for 2027; when people are contacted, whoever doesn't want to go on leaves the list; if the club doesn't happen in 2027, everything is deleted. This is the proposal written in the notice, for the organizers to confirm or adjust.
+- **Missing information shows as pending and doesn't stop the build.** Who organizes and the contact channel are marked as visibly pending, never as information. The site can be deployed and reviewed like that; collecting answers waits for both, by connecting the database only after they're filled in.
 - **Rate limiting keeps a keyed hash of the IP for at most an hour**, in a separate table never joined with the responses.
 - **The responses are read in Neon's console.** No admin page: the list is small, Neon's table view and SQL editor cover reading, exporting, applying changes and deleting, and there's nothing new to secure.
 - **Requests are confirmed through the number itself** before acting, and stopping contact means deleting the row (its change requests go with it). Dropping only the test invite is an update of that column. The README covers exports, Neon's restore window and branches.
-- **Region: São Paulo** for the function and the database, as the notice says.
+- **Region: São Paulo** for the function and the database.
 
 ### fonts
 
@@ -63,10 +65,10 @@ Where the file falls short of WCAG 2.2 AA, the implementation moves as little as
 
 ### deploy
 
-- **Prepared for Vercel and Neon, not deployed.** No Vercel or Neon account was available to this work, so no project, database or deployment was created. The README has the steps. The function was built with the Vercel CLI and checked locally.
+- **Deployed on Vercel from `main`.** The project is the organizers'; `vercel.json` fixes how it's built, so the project settings can't change it. No database was connected by this work: that step turns collection on and waits for the notice (README).
 - **Link previews use the production domain**, from `VERCEL_PROJECT_PRODUCTION_URL` or `SITE_URL`, even on preview deployments.
 
 ## still open
 
-- **The three pending items of the privacy notice**: who organizes and answers for the data, the contact channel for privacy requests, and the retention criterion. The form can't be published without them.
-- **Retention, proposed and not approved.** Review the list after the first round of messages and delete what isn't needed anymore (people who didn't want to go on, change requests already handled); use the end of 2027 as the first deadline to review whether keeping anything still makes sense; if the club doesn't go ahead, delete the list. Requests to delete are handled as they come, whatever the schedule. Once approved, this (in the organizers' words) replaces `[CRITÉRIO DE RETENÇÃO APROVADO]`.
+- **Who organizes the club and the contact channel for privacy requests**, the two pending items of the notice. Answers wait for both.
+- **The retention criterion in the notice** is a proposal; the organizers confirm it or change the wording.

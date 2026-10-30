@@ -11,7 +11,6 @@ export default defineConfig(({ mode }) => {
       localApi(env.DATABASE_URL, env.LOCAL_DB_DIR ?? '.data/pglite', Number(env.LOCAL_RATE_LIMIT) || undefined),
       cleanUrls(),
       shareMetadata(siteUrl(env)),
-      privacyGate(env.ALLOW_PENDING_PRIVACY === '1'),
     ],
     build: {
       target: 'es2022',
@@ -108,27 +107,6 @@ function shareMetadata(url: string): Plugin {
             html
               .replace(/\s*<(link rel="canonical"|meta property="og:url")[^>]*%SITE_URL%[^>]*>/g, '')
               .replaceAll('%SITE_URL%', ''),
-    },
-  };
-}
-
-/**
- * The privacy notice has items only the organizers can fill in (marked with
- * data-pending). A production build stops while any is left, so the form
- * can't be published without them. ALLOW_PENDING_PRIVACY=1 lets a private
- * preview through; the items then show as visibly pending.
- */
-function privacyGate(allowPending: boolean): Plugin {
-  return {
-    name: 'privacy-gate',
-    apply: 'build',
-    transformIndexHtml(html, context) {
-      const pending = [...html.matchAll(/<mark[^>]*data-pending[^>]*>([^<]*)<\/mark>/g)].map((match) => match[1]);
-      if (pending.length === 0 || allowPending) return html;
-      throw new Error(
-        `${context.filename} still has pending information: ${pending.join(', ')}. ` +
-          'Fill it in before publishing (README: before publishing), or set ALLOW_PENDING_PRIVACY=1 for a private preview.',
-      );
     },
   };
 }

@@ -4,7 +4,7 @@ The interest form for a book club that should start in 2027, with monthly meetin
 
 At this stage the club only wants to know who would join and how to reach them once the details are settled. **It isn't an enrollment.** The form asks two single-choice questions (interest in the club, and whether the person could join in person, online or both), a name or nickname, a WhatsApp number, and offers a separate, optional invitation to test a digital experience related to the club.
 
-> **status:** working end to end, not published. The page reproduces the approved Figma screens on mobile and desktop, validates the answers, stores them in Postgres and confirms only after they're recorded. Three items of the privacy notice still depend on the organizers, and the production build refuses to run until they're filled in (see [before publishing](#before-publishing)).
+> **status:** working end to end and ready to deploy; not collecting answers yet. The page reproduces the approved Figma screens on mobile and desktop, validates the answers, stores them in Postgres and confirms only after they're recorded. Two items of the privacy notice still depend on the organizers, and answers should only be collected once they're filled in (see [before collecting answers](#before-collecting-answers)).
 
 ## design source
 
@@ -20,7 +20,7 @@ The interface copy is Brazilian Portuguese, lowercase and without emoji. Decisio
 Two static pages and one serverless function.
 
 - **The form** (`index.html`) is plain HTML, CSS and a small TypeScript module, built with Vite. It's a native form: radio groups with `required` under a `fieldset` and `legend`, labelled inputs, a real checkbox and a submit button. The script validates on submit, shows errors next to each field, sends the answers as JSON and swaps the form for the confirmation once the server says they were recorded. Otherwise the form stays as it was, with a message that says what is known about the failure and the button ready to try again.
-- **The privacy notice** (`privacidade.html`, served at `/privacidade`) explains who is responsible, what is kept and why, where it lives, for how long and how to stop, correct or delete. The form links to it under the button.
+- **The privacy notice** (`privacidade.html`, served at `/privacidade`) explains, in a few short lines, who organizes the club, why the form asks for a name and a WhatsApp, how the test invite works, how long answers are kept and how to stop, correct or delete. The form links to it under the button.
 - **The function** (`api/responses.ts`, `POST /api/responses`) validates the answers again with the same rules (`shared/interest.ts`) and records them in Postgres. It answers `200` only after the write.
 - **The database** is Postgres on [Neon](https://neon.tech) (`db/schema.sql`).
 
@@ -88,7 +88,7 @@ npm run dev        # http://localhost:5173, with the API on a local PGlite datab
 npm test           # unit and API tests (Vitest, against PGlite)
 npm run test:e2e   # browser tests (Playwright) on mobile and desktop
 npm run typecheck
-npm run build      # typecheck + production build into dist/ (see before publishing)
+npm run build      # typecheck + production build into dist/
 npm run og         # regenerates public/og.jpg, the link preview image
 ```
 
@@ -140,15 +140,14 @@ The light masses are the SVG groups exported from the file, blur included. They 
 - **Fraunces** (SIL Open Font License) comes from `@fontsource-variable/fraunces` with all its axes, since the file sets `SOFT 0` and `WONK 1`.
 - **Satoshi** (ITF Free Font License, [Fontshare](https://www.fontshare.com/fonts/satoshi)) can be self-hosted on our own site but not redistributed through a repository, so it isn't committed. `scripts/fetch-satoshi.mjs` downloads the official package before `dev` and `build` and extracts the three `.woff2` files used (Regular, Medium, Bold) into `src/assets/fonts/satoshi/`, unmodified. The build serves them from our domain. `public/og.jpg` is an image rendered with both, which the licenses allow.
 
-## before publishing
+## before collecting answers
 
-The privacy notice has three items only the organizers can provide. In `privacidade.html` they are marked `<mark class="pending" data-pending>`, and the page shows them as visibly pending:
+The privacy notice has two items only the organizers can provide. In `privacidade.html` they are marked `<mark class="pending" data-pending>` and show as visibly pending, never as real information:
 
 - `[IDENTIFICAÇÃO DOS RESPONSÁVEIS]`: who organizes the club and answers for the data;
-- `[CANAL DE CONTATO PARA PRIVACIDADE]`: where to ask to stop, correct or delete (an e-mail or a number other than the club's first message);
-- `[CRITÉRIO DE RETENÇÃO APROVADO]`: how long the list is kept. There's a proposal in [docs/product-decisions.md](docs/product-decisions.md#still-open).
+- `[CANAL DE CONTATO PARA PRIVACIDADE]`: where to ask to stop, correct or delete before the club has messaged anyone (an e-mail or a number).
 
-While any of them is left, `npm run build` stops with a message saying which. `ALLOW_PENDING_PRIVACY=1` lets a build through for a private preview only.
+They don't stop the build: the site can be deployed and reviewed with them pending. Answers should only be collected once both are filled in, so connect the database (which is what turns collection on) and share the link only after that.
 
 To fill them in:
 
@@ -156,14 +155,12 @@ To fill them in:
 2. Run `npm test`. `shared/copy.test.ts` fails and prints the notice as it now reads; paste it as the `notice` of version `v2` in `db/schema.sql`. Version `v2` can still be corrected because nobody has seen it yet; once the form is public, any change to the texts needs a new version (`v3` in `db/schema.sql`, `shared/interest.ts` and `data-consent-version` in `index.html`).
 3. If the database was created before this, run `db/schema.sql` again: it updates the wording of a version only while no response points to it.
 
-The notice also says the data is on Vercel and on a Neon database in São Paulo. If the project ends up elsewhere, change that sentence too.
-
 ## deploy on Vercel
 
 The pages are static and the API is one Vercel Function; the database is Neon, which Vercel offers as a native integration. Nothing here needs a paid plan.
 
-1. **Fill in the privacy notice** (above). Without it the build fails.
-2. **Import the repository** in Vercel (Add New → Project). It detects Vite, `npm run build` and `dist`; nothing needs overriding.
+1. **Import the repository** in Vercel (Add New → Project), with `main` as the production branch. `vercel.json` sets the Vite preset, `npm run build` and `dist`, so whatever the project settings say, the build is the same.
+2. **Fill in the privacy notice** (above) before going further: the next step turns collection on.
 3. **Add the database**: Storage → Create Database → Neon (or connect an existing Neon project), in the **São Paulo (aws-sa-east-1)** region, next to the function (`vercel.json` pins functions to `gru1`). The integration adds `DATABASE_URL`. Keep it on **Production** only: preview deployments shouldn't write to the real list, and a Neon branch made for a preview starts as a copy of everyone's answers.
 4. **Create the tables** once: in Neon's console, SQL Editor, paste `db/schema.sql` and run it. Or, from a machine with the connection string in `.env.local`, run `npm run db:migrate`.
 5. **Deploy** and send one test answer from the published page. Check it under Tables → `responses`, then delete it (see below).

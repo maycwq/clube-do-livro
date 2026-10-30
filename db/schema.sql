@@ -55,10 +55,11 @@ create table if not exists request_log (
 
 create index if not exists request_log_client_key_created_at on request_log (client_key, created_at);
 
--- v1 is the first wording, never published. v2 adds the privacy notice; its
--- pending items have to be filled in before publishing (README). A version
--- can still be corrected here while no response points to it; after that,
--- any change needs a new version.
+-- v1 is the first wording, never published. v2 adds the privacy notice; who
+-- organizes the club and the contact channel still have to be filled in
+-- before answers are collected (README). A version can still be corrected
+-- here while no response points to it; after that, any change needs a new
+-- version.
 insert into consent_texts as existing (version, contact, privacy, test_invite, notice) values (
   'v1',
   'ao enviar, você deixa a gente te chamar pelo WhatsApp sobre o clube. pra parar depois, é só avisar.',
@@ -71,25 +72,18 @@ insert into consent_texts as existing (version, contact, privacy, test_invite, n
   'a gente usa seus dados só pra organizar o clube e entrar em contato sobre ele.',
   'a gente também tá criando uma experiência digital pro clube. quer receber um convite pra testar quando tiver algo pronto? sim, me chama pra testar também',
   'como usamos seus dados
-esse formulário serve pra gente saber quem tem vontade de participar do clube e conseguir chamar essas pessoas quando os detalhes estiverem definidos. aqui vai, em poucas linhas, o que a gente faz com o que você responde.
+a gente pede pouca coisa no formulário. aqui vai, rapidinho, o que faz com ela.
 quem organiza
-o clube é organizado por [IDENTIFICAÇÃO DOS RESPONSÁVEIS], que respondem pelo uso desses dados.
-o que a gente guarda e pra quê
-seu nome ou apelido e seu WhatsApp, pra saber como te chamar e conseguir falar com você;
-suas respostas sobre a vontade de participar e o formato dos encontros, pra organizar o clube;
-se você quer o convite pra testar a experiência digital;
-quando você enviou e qual versão destes textos estava no ar, pra registrar sua autorização.
-não usamos cookies nem ferramentas de análise, e não guardamos seu endereço IP junto das respostas.
-contato sobre o clube e convite pro teste
-o WhatsApp é usado só pra falar do clube: contar os detalhes quando estiverem definidos e saber se você ainda tá a fim. ninguém entra em grupo sem combinar. ao enviar o formulário você autoriza esse contato, e pode retirar a autorização quando quiser.
-o convite pra testar a experiência digital é separado e opcional. só chamamos pra isso quem marcou essa opção, e desistir dele não muda nada na sua participação no clube.
-onde ficam e quem vê
-o site fica na Vercel e as respostas, num banco de dados da Neon, em servidores em são paulo. só quem organiza o clube tem acesso a elas. as respostas não ficam públicas e não são vendidas nem repassadas pra ninguém.
-se alguém enviar o formulário de novo com um número que já está aqui, a gente não troca as respostas na hora: guarda o pedido e confirma pelo próprio WhatsApp antes de mudar qualquer coisa.
+o clube é organizado por [IDENTIFICAÇÃO DOS RESPONSÁVEIS]. somos nós que recebemos as respostas e cuidamos delas.
+por que pedimos seu nome e seu WhatsApp
+pra te chamar quando os detalhes do clube estiverem definidos, contar como vai funcionar e saber se você ainda tá a fim. ninguém entra em grupo sem combinar. as respostas sobre interesse e formato ajudam a gente a planejar os encontros.
+tudo fica guardado num banco de dados que só a gente acessa. não usamos cookies nem ferramentas de análise, e não repassamos suas respostas pra ninguém.
+o convite pro teste digital
+marcar “sim, me chama pra testar também” é opcional e não muda nada na sua participação no clube. só chamamos pra testar quem marcou, e dá pra desistir quando quiser.
 por quanto tempo
-[CRITÉRIO DE RETENÇÃO APROVADO]
+a gente guarda as respostas só enquanto organiza o clube pra 2027. quando chamar as pessoas, quem não quiser seguir sai da lista; e se o clube não acontecer em 2027, a gente apaga tudo.
 pra parar, corrigir ou apagar
-pra saber o que temos sobre você, corrigir alguma coisa, apagar seus dados ou parar o contato, é só avisar por [CANAL DE CONTATO PARA PRIVACIDADE] ou responder a nossa mensagem no WhatsApp. a gente confirma pelo número cadastrado que o pedido é seu e atende o quanto antes, inclusive nas cópias que tivermos feito.'
+é só avisar por [CANAL DE CONTATO PARA PRIVACIDADE] ou responder a nossa mensagem no WhatsApp. a gente confirma que o pedido veio do seu número e para de te chamar, corrige ou apaga o que você mandou, inclusive das cópias que tivermos.'
 )
 on conflict (version) do update set
   contact = excluded.contact,
