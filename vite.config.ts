@@ -14,7 +14,6 @@ export default defineConfig(({ mode }) => {
     ],
     build: {
       target: 'es2022',
-      rollupOptions: { input: { main: 'index.html', privacidade: 'privacidade.html' } },
     },
     test: { include: ['**/*.test.ts'], exclude: ['node_modules', 'e2e'] },
   };
@@ -64,11 +63,14 @@ function localApi(databaseUrl: string | undefined, localDbDir: string, rateLimit
   };
 }
 
-/** /privacidade serves privacidade.html locally, as cleanUrls does on Vercel. */
+/**
+ * /privacidade is the form with "como usamos seus dados" open (drawer.ts),
+ * so a link to it keeps working. Served locally as vercel.json does.
+ */
 function cleanUrls(): Plugin {
   const rewrite: Connect.NextHandleFunction = (req, _res, next) => {
     if (req.url === '/privacidade' || req.url?.startsWith('/privacidade?')) {
-      req.url = req.url.replace('/privacidade', '/privacidade.html');
+      req.url = req.url.replace('/privacidade', '/index.html');
     }
     next();
   };

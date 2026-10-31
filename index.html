@@ -158,7 +158,7 @@
                 <button class="button" type="submit" data-label="quero acompanhar o clube" data-sending-label="enviando...">quero acompanhar o clube</button>
                 <p class="submit__status visually-hidden" role="status"></p>
                 <div class="failure" role="alert"></div>
-                <p class="submit__privacy">a gente usa seus dados só pra organizar o clube e entrar em contato sobre ele. <a class="submit__link" href="/privacidade">como usamos seus dados</a></p>
+                <p class="submit__privacy">a gente usa seus dados só pra organizar o clube e entrar em contato sobre ele. <a class="submit__link" href="/privacidade" aria-haspopup="dialog" aria-controls="como-usamos">como usamos seus dados</a></p>
               </div>
 
               <div class="trap" aria-hidden="true">
@@ -204,5 +204,44 @@
         <footer class="signature">olue © 2026</footer>
       </main>
     </div>
+
+    <dialog class="drawer" id="como-usamos" aria-labelledby="como-usamos-titulo">
+      <header class="drawer__header">
+        <p class="drawer__context">clube do livro</p>
+        <button class="drawer__close" type="button" aria-label="fechar">✕</button>
+      </header>
+      <div class="drawer__content" tabindex="0">
+        <article class="notice">
+          <h2 class="notice__title" id="como-usamos-titulo" tabindex="-1">como usamos seus dados</h2>
+          <p class="notice__lead">a gente pede pouca coisa no formulário. aqui vai, rapidinho, o que faz com ela.</p>
+
+          <section class="notice__section">
+            <h3>quem organiza</h3>
+            <p>o clube é organizado por <mark class="pending" data-pending>[IDENTIFICAÇÃO DOS RESPONSÁVEIS]</mark>. somos nós que recebemos as respostas e cuidamos delas.</p>
+          </section>
+
+          <section class="notice__section">
+            <h3>por que pedimos seu nome e seu WhatsApp</h3>
+            <p>pra te chamar quando os detalhes do clube estiverem definidos, contar como vai funcionar e saber se você ainda tá a fim. ninguém entra em grupo sem combinar. as respostas sobre interesse e formato ajudam a gente a planejar os encontros.</p>
+            <p>tudo fica guardado num banco de dados que só a gente acessa. não usamos cookies nem ferramentas de análise, e não repassamos suas respostas pra ninguém.</p>
+          </section>
+
+          <section class="notice__section">
+            <h3>o convite pro teste digital</h3>
+            <p>marcar “sim, me chama pra testar também” é opcional e não muda nada na sua participação no clube. só chamamos pra testar quem marcou, e dá pra desistir quando quiser.</p>
+          </section>
+
+          <section class="notice__section">
+            <h3>por quanto tempo</h3>
+            <p>a gente guarda as respostas só enquanto organiza o clube pra 2027. quando chamar as pessoas, quem não quiser seguir sai da lista; e se o clube não acontecer em 2027, a gente apaga tudo.</p>
+          </section>
+
+          <section class="notice__section">
+            <h3>pra parar, corrigir ou apagar</h3>
+            <p>é só avisar por <mark class="pending" data-pending>[CANAL DE CONTATO PARA PRIVACIDADE]</mark> ou responder a nossa mensagem no WhatsApp. a gente confirma que o pedido veio do seu número e para de te chamar, corrige ou apaga o que você mandou, inclusive das cópias que tivermos.</p>
+          </section>
+        </article>
+      </div>
+    </dialog>
   </body>
 </html>

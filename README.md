@@ -20,7 +20,7 @@ The interface copy is Brazilian Portuguese, lowercase and without emoji. Decisio
 Two static pages and one serverless function.
 
 - **The form** (`index.html`) is plain HTML, CSS and a small TypeScript module, built with Vite. It's a native form: radio groups with `required` under a `fieldset` and `legend`, labelled inputs, a real checkbox and a submit button. The script points out problems next to each field as soon as they're certain (see `docs/product-decisions.md`, behavior), checks everything again on submit, sends the answers as JSON and swaps the form for the confirmation once the server says they were recorded. Otherwise the form stays as it was, with a message that says what is known about the failure and the button ready to try again.
-- **The privacy notice** (`privacidade.html`, served at `/privacidade`) explains, in a few short lines, who organizes the club, why the form asks for a name and a WhatsApp, how the test invite works, how long answers are kept and how to stop, correct or delete. The form links to it under the button.
+- **The privacy notice** ("como usamos seus dados", in a drawer in `index.html`) explains, in a few short lines, who organizes the club, why the form asks for a name and a WhatsApp, how the test invite works, how long answers are kept and how to stop, correct or delete. The link under the button opens it over the form, which stays as it was; `/privacidade` opens the form with it open, so it can be linked directly.
 - **The function** (`api/responses.ts`, `POST /api/responses`) validates the answers again with the same rules (`shared/interest.ts`) and records them in Postgres. It answers `200` only after the write.
 - **The database** is Postgres on [Neon](https://neon.tech) (`db/schema.sql`).
 
@@ -100,11 +100,11 @@ During `npm run dev`, `GET /api/responses` lists what was stored locally (respon
 
 ```
 index.html                 the form and the confirmation, both in the markup
-privacidade.html           "como usamos seus dados"
 src/
-  main.ts, privacy.ts      entries of the two pages
+  main.ts                  entry of the page
   form.ts                  validation display, sending, failures, confirmation
   panel.ts                 whether the desktop panel fits the window, to stick
+  drawer.ts                "como usamos seus dados": opening, closing, focus, address
   light.ts                 stops the light when it's out of view
   messages.ts              the copy the script shows: field errors, sending, failures
   styles/
@@ -114,7 +114,8 @@ src/
     light.css              light masses: fields, window light, their drift
     motion.css             the page's own motion: arrivals, the confirmation, feedback
     form.css               questions, options, checkbox, fields, button, statuses
-    confirmation.css, notice.css
+    confirmation.css
+    drawer.css             the drawer and the notice in it
   assets/
     light/layers/          light masses from the Figma file, one blurred SVG per shape
     light/atmosphere-form.svg  the desktop group whole, for the link preview image
@@ -153,7 +154,7 @@ Motion comes in two layers. The page's own (`motion.css`) is rare: when it opens
 
 ## before collecting answers
 
-The privacy notice has two items only the organizers can provide. In `privacidade.html` they are marked `<mark class="pending" data-pending>` and show as visibly pending, never as real information:
+The privacy notice has two items only the organizers can provide. In the drawer in `index.html` they are marked `<mark class="pending" data-pending>` and show as visibly pending, never as real information:
 
 - `[IDENTIFICAÇÃO DOS RESPONSÁVEIS]`: who organizes the club and answers for the data;
 - `[CANAL DE CONTATO PARA PRIVACIDADE]`: where to ask to stop, correct or delete before the club has messaged anyone (an e-mail or a number).
@@ -162,7 +163,7 @@ They don't stop the build: the site can be deployed and reviewed with them pendi
 
 To fill them in:
 
-1. Replace each `<mark …>[…]</mark>` in `privacidade.html` with the final text.
+1. Replace each `<mark …>[…]</mark>` in the notice in `index.html` with the final text.
 2. Run `npm test`. `shared/copy.test.ts` fails and prints the notice as it now reads; paste it as the `notice` of version `v2` in `db/schema.sql`. Version `v2` can still be corrected because nobody has seen it yet; once the form is public, any change to the texts needs a new version (`v3` in `db/schema.sql`, `shared/interest.ts` and `data-consent-version` in `index.html`).
 3. If the database was created before this, run `db/schema.sql` again: it updates the wording of a version only while no response points to it.
 
@@ -179,7 +180,7 @@ The pages are static and the API is one Vercel Function; the database is Neon, w
 
 There's no other variable or secret. The rate-limit hash is keyed with `DATABASE_URL`, which is already private.
 
-`vercel.json` also turns on clean URLs (`/privacidade`) and sets the security headers (a strict Content-Security-Policy that allows only the site itself, `Referrer-Policy: same-origin`, `X-Content-Type-Options`, `Permissions-Policy`) and long caching for hashed assets.
+`vercel.json` also serves `/privacidade` as the form, which opens the notice there, and sets the security headers (a strict Content-Security-Policy that allows only the site itself, `Referrer-Policy: same-origin`, `X-Content-Type-Options`, `Permissions-Policy`) and long caching for hashed assets.
 
 ## accessing the responses
 
@@ -257,4 +258,4 @@ Then take care of the copies:
 ## tests
 
 - `npm test` (Vitest): phone and name normalization, validation rules with the reason for each error (accepted and refused names in several alphabets, Brazilian number formats, letters and symbols in a number, what is already certain while typing), and the API handler against a real Postgres (PGlite): storage; stored answers never overwritten by a later submission, including someone else's test invite turned on or off; the same answer whatever was recorded; identical answers and retries recorded once; concurrent submissions for a new number; change requests deleted with their response; 400/403/405/413/415/422/429 answers; `not_stored` and `unconfirmed` failures; the hidden field; rate limiting and hash retention; no personal data in logs. It also checks that the texts stored for the current consent version match the form and the privacy notice.
-- `npm run test:e2e` (Playwright, on a Pixel 7 profile and a 1440 × 900 desktop): nothing flagged while a valid number and name are typed key by key, or when passing through fields and choices; letters and a digit too many flagged while typing, with the value kept; incomplete and emptied fields flagged when left; a real clipboard paste; editing in the middle of a number with the cursor kept; errors going away as soon as they're fixed and not coming back early while re-editing; a name over 80 characters kept whole and explained; long numbers as names; choices questioned only on submit; the optional test invite; empty, whitespace-only and malformed fields on submit, with focus on the first one and the answers kept; each message announced once, not at every key; names stored as typed; storage and confirmation; the test invite stored on its own; the sending state for sighted and screen reader users and double clicks; each kind of failure, including an answer lost after the write and a 429 that is respected; numbers already stored; the privacy notice and coming back to the form with the answers kept; the whole flow by keyboard; axe (WCAG 2.2 A and AA) on the form, its errors, a failure, the confirmation and the notice; contrast of field borders, the button and every text over the light masses (form, confirmation and notice) at rest and at the extremes of each layer's cycle, on a tall and a short window; the light moving only through transform and opacity, not at all with reduced motion, and stopping out of view; the page moving when it opens and when the answer is confirmed, then resting, with the form usable from the first frame; arrivals with reduced motion as short fades only; the four reference widths; a single side margin, from the page shell, with every section on the container's axis, from 320 to 2560 px, and the columns' widths; the desktop panel whole and in view from top to end at six window sizes, with no scroll of its own, scrolling with the page when the window is too short, and the confirmation's closing line inside its panel; and the link preview metadata and image.
+- `npm run test:e2e` (Playwright, on a Pixel 7 profile and a 1440 × 900 desktop): nothing flagged while a valid number and name are typed key by key, or when passing through fields and choices; letters and a digit too many flagged while typing, with the value kept; incomplete and emptied fields flagged when left; a real clipboard paste; editing in the middle of a number with the cursor kept; errors going away as soon as they're fixed and not coming back early while re-editing; a name over 80 characters kept whole and explained; long numbers as names; choices questioned only on submit; the optional test invite; empty, whitespace-only and malformed fields on submit, with focus on the first one and the answers kept; each message announced once, not at every key; names stored as typed; storage and confirmation; the test invite stored on its own; the sending state for sighted and screen reader users and double clicks; each kind of failure, including an answer lost after the write and a 429 that is respected; numbers already stored; the privacy notice in a drawer over the form: opening and closing by the button, Escape, the back button or a click beside it, focus on its title and back on the link, the page behind out of reach of the keyboard and not scrolling, answers and scroll kept, `/privacidade` opening it, its surface, width and fixed header, and only a fade with reduced motion; the whole flow by keyboard; axe (WCAG 2.2 A and AA) on the form, its errors, a failure, the confirmation and the notice in its drawer; contrast of field borders, the button and every text over the light masses (form, confirmation and notice) at rest and at the extremes of each layer's cycle, on a tall and a short window; the light moving only through transform and opacity, not at all with reduced motion, and stopping out of view; the page moving when it opens and when the answer is confirmed, then resting, with the form usable from the first frame; arrivals with reduced motion as short fades only; the four reference widths; a single side margin, from the page shell, with every section on the container's axis, from 320 to 2560 px, and the columns' widths; the desktop panel whole and in view from top to end at six window sizes, with no scroll of its own, scrolling with the page when the window is too short, and the confirmation's closing line inside its panel; and the link preview metadata and image.

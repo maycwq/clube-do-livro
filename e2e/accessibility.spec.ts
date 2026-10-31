@@ -36,8 +36,10 @@ test.describe('axe (WCAG 2.2 A and AA)', () => {
     expect((await audit(page)).violations).toEqual([]);
   });
 
-  test('the privacy notice', async ({ page }) => {
-    await page.goto('/privacidade');
+  test('how the data is used, open over the form', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('link', { name: 'como usamos seus dados' }).click();
+    await expect(page.getByRole('dialog', { name: 'como usamos seus dados' })).toBeVisible();
     expect((await audit(page)).violations).toEqual([]);
   });
 });
@@ -119,7 +121,7 @@ test.describe('contrast', () => {
     }
   });
 
-  test('the confirmation and the privacy notice too', async ({ page }, testInfo) => {
+  test('the confirmation too', async ({ page }, testInfo) => {
     test.slow();
     const desktop = testInfo.project.name === 'desktop';
     if (desktop) await page.setViewportSize({ width: 1280, height: 720 });
@@ -139,13 +141,6 @@ test.describe('contrast', () => {
           ['.done__title', large],
         ];
     await expectReadableOverLight(page, done, 'confirmation');
-
-    await page.goto('/privacidade');
-    const notice: [string, number][] = [
-      ['.notice__title', large],
-      ['.notice__lead', normal],
-    ];
-    await expectReadableOverLight(page, notice, 'privacy notice');
   });
 });
 

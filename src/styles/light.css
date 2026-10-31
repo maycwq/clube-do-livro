@@ -322,9 +322,9 @@
   --dy: -19s;
 }
 
-/* luz editorial / fonte lateral com obstrução: the top of the compact page
-   and the privacy notice, on paper. Frame coordinates, 500 × 532 from
-   y -71, plus 60px. Fewer layers and smaller movements than on desktop. */
+/* luz editorial / fonte lateral com obstrução: the top of the compact page,
+   on paper. Frame coordinates, 500 × 532 from y -71, plus 60px. Fewer
+   layers and smaller movements than on desktop. */
 
 .glow {
   width: 620px;

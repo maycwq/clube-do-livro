@@ -135,24 +135,6 @@
       animation: arrive 1000ms var(--ease-settle) backwards;
     }
   }
-
-  /* The privacy notice: the light comes up, the text with it. */
-  .notice > .light {
-    animation: light-in 1400ms ease-out backwards;
-  }
-
-  .notice > :not(.light) {
-    animation: reveal var(--reveal) var(--ease-settle) backwards;
-    animation-delay: calc(120ms + var(--order, 0) * 60ms);
-  }
-
-  .notice__body {
-    --order: 1;
-  }
-
-  .notice__back {
-    --order: 2;
-  }
 }
 
 /* With reduced motion nothing travels: content that arrives only fades in,
@@ -163,8 +145,7 @@
   .done__panel,
   .done__title,
   .done__content,
-  .done__closing,
-  .notice > :not(.light) {
+  .done__closing {
     animation: appear 200ms ease-out backwards;
   }
 }

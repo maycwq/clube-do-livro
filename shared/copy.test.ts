@@ -7,7 +7,6 @@ import { CONSENT_VERSIONS } from './interest.js';
 // db/schema.sql fails here.
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-const notice = readFileSync(new URL('../privacidade.html', import.meta.url), 'utf8');
 const schema = readFileSync(new URL('../db/schema.sql', import.meta.url), 'utf8');
 
 const text = (className: string) => {
@@ -20,7 +19,7 @@ const text = (className: string) => {
 function noticeText(page: string): string {
   const article = page.slice(page.indexOf('<article'), page.indexOf('</article>'));
   return article
-    .replace(/<\/(h1|h2|p|li)>/g, '\n')
+    .replace(/<\/(h1|h2|h3|p|li)>/g, '\n')
     .replace(/<[^>]+>/g, '')
     .split('\n')
     .map((line) => line.replace(/\s+/g, ' ').trim())
@@ -45,11 +44,11 @@ describe('consent texts', () => {
   });
 
   it('match the privacy notice stored for that version', () => {
-    const current = noticeText(notice);
-    expect(seed![4], `privacidade.html changed; store this text for ${version}:\n\n${current}\n`).toBe(current);
+    const current = noticeText(html);
+    expect(seed![4], `the notice in index.html changed; store this text for ${version}:\n\n${current}\n`).toBe(current);
   });
 
   it('link the form to the notice', () => {
-    expect(html).toContain('<a class="submit__link" href="/privacidade">como usamos seus dados</a>');
+    expect(html).toMatch(/<a class="submit__link" href="\/privacidade"[^>]*>como usamos seus dados<\/a>/);
   });
 });

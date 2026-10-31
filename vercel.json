@@ -5,6 +5,7 @@
   "outputDirectory": "dist",
   "regions": ["gru1"],
   "cleanUrls": true,
+  "rewrites": [{ "source": "/privacidade", "destination": "/" }],
   "headers": [
     {
       "source": "/(.*)",

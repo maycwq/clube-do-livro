@@ -1,0 +1,227 @@
+/* "como usamos seus dados" in a drawer ---------------------------------------
+
+   The olue design system's escrivaninha (web / escrivaninha / base): a
+   surface that comes in from the right over the page, which stays where it
+   was behind it. Same paper as the page, a hairline border and a delicate
+   shadow to the left, 48px only on the left corners, a small header with
+   the context and the close, and below it the content, which scrolls on its
+   own so the header and the close are always there.
+
+   Wider than the component's 380px, since here it's a reading surface: a
+   bit under 40% of the window, between 420 and 520px, so the text keeps
+   about 60 characters a line without the drawer looking like a new page.
+   On narrow screens it takes the whole width, without the rounded corners
+   that would have nothing to round against. */
+
+.drawer {
+  --drawer-width: clamp(420px, 38vw, 520px);
+  /* The component's #80766d and #ab9e91, darkened just enough for 4.5:1 on
+     the paper (11px label) and 3:1 (the close, a control). */
+  --drawer-context: #7a7067;
+  --drawer-close: #968a7f;
+
+  position: fixed;
+  inset: 0 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: var(--drawer-width);
+  max-width: none;
+  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--cores-borda-sutil);
+  border-right: 0;
+  border-radius: 48px 0 0 48px;
+  background: var(--cores-fundo-superficie);
+  box-shadow: -8px 0 30px -8px rgb(43 39 36 / 0.1);
+  color: var(--cores-texto-principal);
+}
+
+.drawer:not([open]) {
+  display: none;
+}
+
+/* The page stays visible behind it, barely held back. */
+.drawer::backdrop {
+  background: rgb(43 39 36 / 0.1);
+}
+
+/* While it's open the page doesn't scroll under it (drawer.ts). */
+html[data-drawer] {
+  overflow: hidden;
+}
+
+@media (max-width: 599px) {
+  .drawer {
+    width: 100%;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* cabeçalho */
+.drawer__header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 20px 16px 24px;
+}
+
+.drawer__context {
+  font-size: 11px;
+  line-height: normal;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  color: var(--drawer-context);
+}
+
+/* The ✕ of the component, with a target of 44px around it. */
+.drawer__close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -14px -14px -14px 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 500;
+  color: var(--drawer-close);
+  cursor: pointer;
+}
+
+.drawer__close:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: -6px;
+}
+
+/* conteúdo */
+.drawer__content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px 24px 24px;
+}
+
+/* Focusable so the keyboard can scroll it; focus starts on the title. */
+.drawer__content:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: -2px;
+}
+
+/* The notice, in the form's type scale ----------------------------------- */
+
+/* At most the line of the widest drawer, also when it takes a whole
+   narrow screen. */
+.notice {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 480px;
+}
+
+.notice__title {
+  font-family: var(--fonte-titulo);
+  font-variation-settings: var(--fraunces-eixos);
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 42px;
+}
+
+.notice__title:focus {
+  outline: none;
+}
+
+.notice__lead {
+  font-size: 17px;
+  line-height: 25px;
+}
+
+.notice__section {
+  margin-top: 18px;
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.notice__section h3 {
+  margin: 0 0 10px;
+  font-family: var(--fonte-titulo);
+  font-variation-settings: var(--fraunces-eixos);
+  font-weight: 600;
+  font-size: 23px;
+  line-height: 28px;
+}
+
+.notice__section p + p {
+  margin-top: 12px;
+}
+
+/* Information the organizers still have to provide, marked so it can't
+   pass for the real thing. */
+.pending {
+  padding: 0 4px;
+  outline: 1px dashed var(--erro-texto);
+  background: var(--papel-quente);
+  color: var(--erro-texto);
+  font-weight: 500;
+}
+
+/* Coming and going: from the right and back, quick to arrive and long to
+   land (motion.css), quicker to leave. */
+@media (prefers-reduced-motion: no-preference) {
+  .drawer[open] {
+    animation: drawer-in 520ms var(--ease-settle);
+  }
+
+  .drawer[open]::backdrop {
+    animation: appear 520ms ease-out;
+  }
+
+  .drawer[data-closing] {
+    animation: drawer-out 380ms cubic-bezier(0.5, 0, 0.75, 0) forwards;
+  }
+
+  .drawer[data-closing]::backdrop {
+    animation: vanish 380ms ease-in forwards;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer[open],
+  .drawer[open]::backdrop {
+    animation: appear 160ms ease-out;
+  }
+
+  .drawer[data-closing],
+  .drawer[data-closing]::backdrop {
+    animation: vanish 120ms ease-in forwards;
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes drawer-out {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes vanish {
+  to {
+    opacity: 0;
+  }
+}
