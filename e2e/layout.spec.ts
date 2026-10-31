@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { confirmation, fill, phone, submitButton } from './helpers.js';
+import { confirmation, fill, phone, settled, submitButton } from './helpers.js';
 
 test.describe('reference widths', () => {
   for (const width of [320, 390, 768, 1440]) {
@@ -104,6 +104,7 @@ test.describe('the desktop panel', () => {
       await page.setViewportSize({ width, height });
       await page.goto('/');
       await page.evaluate(() => document.fonts.ready);
+      await settled(page);
       const panel = page.locator('.opening');
       await expect(panel).toHaveCSS('position', 'sticky');
       await expect(panel).toHaveCSS('overflow-y', 'clip');
@@ -138,6 +139,7 @@ test.describe('the desktop panel', () => {
     await fill(page, phone(testInfo), { optIn: true });
     await submitButton(page).click();
     await expect(confirmation(page)).toBeVisible();
+    await settled(page);
     const box = (await page.locator('.done__panel').boundingBox())!;
     for (const text of ['.done__identity', '.done__title', '.done__closing']) {
       const inner = (await page.locator(text).boundingBox())!;

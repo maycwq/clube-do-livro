@@ -150,12 +150,10 @@
     content: none;
   }
 
-  /* The same light as the form's panel, with a softer bounce, as in the
-     file. Under the title and as far from the closing line as in the
+  /* The same window light as the form's panel. Under the title and as far from the closing line as in the
      frame; on shorter panels it stays under the title and loses some of
      its lower part, as in the form's panel. */
   .done__atmosphere {
-    --ambient: 0.755;
     top: max(198px, 100% - 582px);
     left: calc(100% - 475px);
   }

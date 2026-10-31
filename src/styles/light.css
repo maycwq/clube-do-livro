@@ -1,20 +1,35 @@
 /* Light masses ---------------------------------------------------------------
 
-   Each light group of the Figma file is split into its shapes, one blurred
-   SVG per layer (assets/light/layers), stacked in the file's order. At rest
-   the stack is the frame's composition, which is what prefers-reduced-motion
-   shows.
+   Ambient motion, separate from the page's own motion (motion.css): slow,
+   continuous and never needed to understand anything.
 
-   In motion it behaves like late sun through an opening: each layer has its
-   own slow cycle, so the source breathes (intensity), opens and closes a
-   little (size), its incidence and reflections drift, and now and then
-   part of the warm light turns more golden, rosier or lilac. The
-   cycles have different, unrelated lengths, so the combination doesn't
-   repeat in any noticeable way. Movement stays away from the text, and the
-   light never gets brighter than at rest, so contrast holds at every moment.
+   Each surface has two kinds of layer:
+   - fields: large, soft radial gradients in the solar family, bigger than
+     the surface and partly outside it, for depth: a warm near-black, a
+     dominant warm color and a second one close to it;
+   - the window light from the Figma file, one blurred SVG per shape
+     (assets/light/layers): the source behind the opening, the edge that
+     hides it and its reflection.
 
-   Only opacity and transform are animated: the browser composites the
-   layers without layout or repaint. */
+   At rest the layers are the composition, which is what
+   prefers-reduced-motion shows. In motion every layer drifts on its own:
+   position on each axis, size, turn and intensity each have their own
+   cycle, between 11 and 37 seconds, so the light changes place and
+   temperature without ever visibly coming back to where it started.
+
+   The window light only moves away from the text and only gets dimmer
+   than at rest. The warm fields sit below and to the right of the text,
+   grow away from it and never drift up toward it; the near-black one only
+   darkens what's behind the text. The tests check every text over the
+   light at rest and across the cycle. Only transform properties and
+   opacity change: the browser
+   composites the layers without layout or repaint, and light.ts pauses
+   them when they're out of view. */
+
+:root {
+  /* A slow sine: no stop at the turns, no visible start or end. */
+  --ease-drift: cubic-bezier(0.37, 0, 0.63, 1);
+}
 
 .light {
   position: absolute;
@@ -22,257 +37,357 @@
   pointer-events: none;
 }
 
-.light > span,
-.light > span::before,
-.light > span::after {
+.light > span {
   position: absolute;
   inset: 0;
   background-repeat: no-repeat;
   background-size: 100% 100%;
+  transform-origin: var(--origin, 50% 50%);
+  translate: var(--x0, 0px) 0;
+  transform: translateY(var(--y0, 0px));
+  scale: var(--s0, 1);
+  rotate: var(--r0, 0deg);
+  opacity: var(--o0, 1);
 }
 
-/* A layer that changes color carries both images: the usual one in
-   ::before and the other in ::after, which stays away most of the time and
-   now and then slowly takes over part of it. One recedes exactly as much as
-   the other comes in, so the light changes temperature without getting
-   any stronger. */
-.light > span::after {
-  opacity: 0;
-}
-
-@keyframes tone-in {
-  0%,
-  52%,
-  100% {
-    opacity: 0;
-  }
-  76% {
-    opacity: var(--tone);
-  }
-}
-
-@keyframes tone-out {
-  0%,
-  52%,
-  100% {
-    opacity: 1;
-  }
-  76% {
-    opacity: calc(1 - var(--tone));
-  }
+/* A field: an elliptical radial gradient with a falloff close to a
+   gaussian, so it has no edge to read as a shape. Placed and sized in
+   percent of its surface; color (--c, "r g b") and intensity (--a) per
+   surface. */
+.light > .field {
+  inset: auto;
+  left: var(--left);
+  top: var(--top);
+  width: var(--w);
+  height: var(--h);
+  background: radial-gradient(
+    closest-side,
+    rgb(var(--c) / var(--a)) 0%,
+    rgb(var(--c) / calc(var(--a) * 0.86)) 22%,
+    rgb(var(--c) / calc(var(--a) * 0.55)) 45%,
+    rgb(var(--c) / calc(var(--a) * 0.23)) 70%,
+    rgb(var(--c) / calc(var(--a) * 0.07)) 88%,
+    rgb(var(--c) / 0) 100%
+  );
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .light > span::before,
-  .light > span::after {
-    will-change: opacity;
-    animation: tone-out var(--tone-cycle) ease-in-out var(--tone-delay, 0s) infinite;
+  .light > span {
+    animation:
+      drift-x var(--tx, 19s) var(--ease-drift) var(--dx, 0s) infinite alternate,
+      drift-y var(--ty, 23s) var(--ease-drift) var(--dy, 0s) infinite alternate,
+      drift-scale var(--ts, 29s) var(--ease-drift) var(--ds, 0s) infinite alternate,
+      drift-turn var(--tr, 37s) var(--ease-drift) var(--dr, 0s) infinite alternate,
+      drift-glow var(--to, 17s) var(--ease-drift) var(--do, 0s) infinite alternate;
   }
 
-  .light > span::after {
-    animation-name: tone-in;
+  /* Out of view (light.ts): nothing to draw, nothing to run. */
+  .light[data-paused] > span {
+    animation-play-state: paused;
   }
 }
 
-/* atmosfera editorial / fonte oculta + reflexo: the desktop panels.
-   The group is 523 × 432 in the file; layers add 60px around it for the blur. */
+@keyframes drift-x {
+  from {
+    translate: var(--x0, 0px) 0;
+  }
+  to {
+    translate: var(--x1, 0px) 0;
+  }
+}
+
+@keyframes drift-y {
+  from {
+    transform: translateY(var(--y0, 0px));
+  }
+  to {
+    transform: translateY(var(--y1, 0px));
+  }
+}
+
+@keyframes drift-scale {
+  from {
+    scale: var(--s0, 1);
+  }
+  to {
+    scale: var(--s1, 1);
+  }
+}
+
+@keyframes drift-turn {
+  from {
+    rotate: var(--r0, 0deg);
+  }
+  to {
+    rotate: var(--r1, 0deg);
+  }
+}
+
+@keyframes drift-glow {
+  from {
+    opacity: var(--o0, 1);
+  }
+  to {
+    opacity: var(--o1, 1);
+  }
+}
+
+/* Fields of the desktop panels -------------------------------------------- */
+
+.fields {
+  inset: 0;
+}
+
+/* Warm near-black: the depth of the surface, mostly behind the text. */
+.field--deep {
+  --c: 26 10 12;
+  --a: 0.8;
+  --left: -60%;
+  --top: -15%;
+  --w: 160%;
+  --h: 80%;
+  --x0: -8%;
+  --x1: 9%;
+  --tx: 19s;
+  --dx: -7s;
+  --y0: -10%;
+  --y1: 10%;
+  --ty: 23s;
+  --dy: -13s;
+  --s0: 0.95;
+  --s1: 1.08;
+  --ts: 29s;
+  --r0: -10deg;
+  --r1: -2deg;
+  --tr: 37s;
+  --dr: -20s;
+  --o0: 0.85;
+  --o1: 1;
+  --to: 17s;
+  --do: -4s;
+}
+
+/* The dominant color, from below and the right, mostly outside. */
+.field--main {
+  --c: 176 74 49;
+  --a: 0.55;
+  --left: 20%;
+  --top: 56%;
+  --w: 140%;
+  --h: 78%;
+  --x0: -10%;
+  --x1: 8%;
+  --tx: 13s;
+  --dx: -3s;
+  --y0: 0%;
+  --y1: 10%;
+  --ty: 17s;
+  --dy: -11s;
+  --s0: 0.94;
+  --s1: 1.06;
+  --ts: 21s;
+  --ds: -8s;
+  --r0: 10deg;
+  --r1: 22deg;
+  --tr: 31s;
+  --o0: 0.75;
+  --o1: 1;
+  --to: 11s;
+  --do: -6s;
+  --origin: 0% 0%;
+}
+
+/* A second color, close to the first and lighter, at the right edge below
+   the text. Like the dominant one, it never drifts up toward the text. */
+.field--accent {
+  --c: 214 112 78;
+  --a: 0.34;
+  --left: 62%;
+  --top: 62%;
+  --w: 80%;
+  --h: 50%;
+  --x0: -8%;
+  --x1: 10%;
+  --tx: 11s;
+  --dx: -9s;
+  --y0: 0%;
+  --y1: 14%;
+  --ty: 15s;
+  --dy: -2s;
+  --s0: 0.96;
+  --s1: 1.1;
+  --ts: 19s;
+  --ds: -12s;
+  --r0: -12deg;
+  --r1: -4deg;
+  --tr: 27s;
+  --dr: -9s;
+  --o0: 0.7;
+  --o1: 0.92;
+  --to: 13s;
+  --do: -15s;
+  --origin: 0% 0%;
+}
+
+/* The confirmation's panel has its own temperature: near-black and amber,
+   with a deep peach. */
+.done__fields .field--deep {
+  --a: 0.85;
+  --left: -40%;
+  --top: 10%;
+  --w: 160%;
+  --h: 90%;
+  --r0: 6deg;
+  --r1: 12deg;
+  --dx: -17s;
+  --dy: -3s;
+}
+
+.done__fields .field--main {
+  --c: 194 122 46;
+  --a: 0.55;
+  --left: 25%;
+  --top: 58%;
+  --w: 130%;
+  --h: 70%;
+  --dx: -12s;
+  --dy: -5s;
+  --do: -1s;
+}
+
+.done__fields .field--accent {
+  --c: 217 140 102;
+  --a: 0.4;
+  --left: 70%;
+  --top: 20%;
+  --w: 70%;
+  --h: 60%;
+  --dx: -4s;
+  --dy: -10s;
+}
+
+/* atmosfera editorial / fonte oculta + reflexo: the window light of the
+   desktop panels. The group is 523 × 432 in the file; layers add 60px
+   around it for the blur. */
 
 .atmosphere {
   width: 643px;
   height: 552px;
 }
 
-/* The bounce of the light in the room, now and then rosier. */
-.atmosphere__ambient {
-  --tone: 0.7;
-  --tone-cycle: 71s;
-  transform-origin: 55.2% 51.4%;
-  opacity: var(--ambient, 1);
-}
-
-.atmosphere__ambient::before {
-  content: '';
-  background-image: url('../assets/light/layers/atmosphere-ambient.svg');
-}
-
-.atmosphere__ambient::after {
-  content: '';
-  background-image: url('../assets/light/layers/atmosphere-ambient-rose.svg');
-}
-
-/* The source behind the opening: peach, at times more golden. */
+/* The source behind the opening: grows, drifts and dims toward the right
+   and down, away from the text. */
 .atmosphere__aperture {
-  --tone: 0.75;
-  --tone-cycle: 43s;
-  --tone-delay: -11s;
-  transform-origin: 55.2% 43.7%;
-}
-
-.atmosphere__aperture::before {
-  content: '';
   background-image: url('../assets/light/layers/atmosphere-aperture.svg');
+  --origin: 55% 16%;
+  --x1: 6%;
+  --tx: 19s;
+  --dx: -6s;
+  --y1: 3%;
+  --ty: 23s;
+  --dy: -15s;
+  --s1: 1.05;
+  --ts: 29s;
+  --ds: -11s;
+  --o1: 0.78;
+  --to: 13s;
+  --do: -2s;
 }
 
-.atmosphere__aperture::after {
-  content: '';
-  background-image: url('../assets/light/layers/atmosphere-aperture-gold.svg');
-}
-
-/* The reflection on the floor, at times lilac. */
+/* Its reflection on the floor glides right and fades. */
 .atmosphere__band {
-  --tone: 0.7;
-  --tone-cycle: 83s;
-  --tone-delay: -30s;
-}
-
-.atmosphere__band::before {
-  content: '';
   background-image: url('../assets/light/layers/atmosphere-band.svg');
+  --origin: 30% 70%;
+  --x1: 6%;
+  --tx: 21s;
+  --dx: -14s;
+  --y1: -2%;
+  --ty: 25s;
+  --s1: 1.04;
+  --ts: 31s;
+  --o1: 0.7;
+  --to: 17s;
+  --do: -9s;
 }
 
-.atmosphere__band::after {
-  content: '';
-  background-image: url('../assets/light/layers/atmosphere-band-lilac.svg');
-}
-
+/* The edge that hides the source shifts a little, so the cut of light
+   changes. */
 .atmosphere__obstruction {
   background-image: url('../assets/light/layers/atmosphere-obstruction.svg');
-}
-
-.atmosphere__residual {
-  background-image: url('../assets/light/layers/atmosphere-residual.svg');
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .atmosphere > span {
-    will-change: transform, opacity;
-  }
-
-  /* The bounce of the light in the room: breathes and spreads. */
-  .atmosphere__ambient {
-    animation: ambient-breathe 17s ease-in-out infinite;
-  }
-
-  /* The source behind the opening: dims, widens away from the text, moves
-     its incidence to the right and down. */
-  .atmosphere__aperture {
-    animation: aperture-shift 23s ease-in-out infinite;
-  }
-
-  /* The reflection on the floor glides and fades. */
-  .atmosphere__band {
-    animation: band-glide 29s ease-in-out infinite;
-  }
-
-  /* The edge that hides the source shifts a little, so the cut of light
-     changes. */
-  .atmosphere__obstruction {
-    animation: shade-sway 19s ease-in-out infinite;
-  }
-
-  .atmosphere__residual {
-    animation: residual-glint 13s ease-in-out infinite;
-  }
-}
-
-@keyframes ambient-breathe {
-  0%,
-  100% {
-    opacity: var(--ambient, 1);
-    transform: none;
-  }
-  50% {
-    opacity: calc(var(--ambient, 1) * 0.68);
-    transform: translate(-8px, 6px) scale(1.07);
-  }
-}
-
-@keyframes aperture-shift {
-  0%,
-  100% {
-    opacity: 1;
-    transform: none;
-  }
-  35% {
-    opacity: 0.88;
-    transform: translate(7px, 3px) scaleX(1.04);
-  }
-  70% {
-    opacity: 0.76;
-    transform: translate(14px, 8px) scaleX(0.97);
-  }
-}
-
-@keyframes band-glide {
-  0%,
-  100% {
-    opacity: 1;
-    transform: none;
-  }
-  50% {
-    opacity: 0.66;
-    transform: translate(-14px, 6px);
-  }
-}
-
-@keyframes shade-sway {
-  0%,
-  100% {
-    transform: none;
-  }
-  50% {
-    transform: translate(6px, -4px);
-  }
-}
-
-@keyframes residual-glint {
-  0%,
-  100% {
-    opacity: 1;
-    transform: none;
-  }
-  50% {
-    opacity: 0.5;
-    transform: translate(12px, 2px);
-  }
+  --x1: 3%;
+  --tx: 17s;
+  --dx: -5s;
+  --y1: -2%;
+  --ty: 27s;
+  --dy: -19s;
 }
 
 /* luz editorial / fonte lateral com obstrução: the top of the compact page
-   and the privacy notice. Frame coordinates, 500 × 532 from y -71, plus 60px. */
+   and the privacy notice, on paper. Frame coordinates, 500 × 532 from
+   y -71, plus 60px. Fewer layers and smaller movements than on desktop. */
 
 .glow {
   width: 620px;
   height: 652px;
 }
 
+/* Where the file has a lilac bounce, a deep peach in the solar family. */
+.glow__field {
+  --c: 233 152 120;
+  --a: 0.5;
+  --left: 25%;
+  --top: 9%;
+  --w: 52%;
+  --h: 50%;
+  --x0: -6%;
+  --x1: 8%;
+  --tx: 13s;
+  --dx: -5s;
+  --y0: -7%;
+  --y1: 6%;
+  --ty: 17s;
+  --dy: -12s;
+  --s0: 0.96;
+  --s1: 1.08;
+  --ts: 21s;
+  --o0: 0.75;
+  --o1: 1;
+  --to: 15s;
+  --do: -7s;
+}
+
 .glow__warm {
-  --tone: 0.7;
-  --tone-cycle: 61s;
-  --tone-delay: -12s;
-  transform-origin: 66.6% 48%;
-}
-
-.glow__warm::before {
-  content: '';
   background-image: url('../assets/light/layers/glow-warm.svg');
-}
-
-.glow__warm::after {
-  content: '';
-  background-image: url('../assets/light/layers/glow-warm-rose.svg');
-}
-
-.glow__lilac {
-  background-image: url('../assets/light/layers/glow-lilac.svg');
-  transform-origin: 51% 34.4%;
+  --origin: 53% 31%;
+  --x1: 4%;
+  --tx: 17s;
+  --dx: -9s;
+  --y1: -3%;
+  --ty: 21s;
+  --dy: -3s;
+  --s1: 1.06;
+  --ts: 25s;
+  --ds: -14s;
+  --o1: 0.8;
+  --to: 15s;
 }
 
 .glow__threshold {
   background-image: url('../assets/light/layers/glow-threshold.svg');
+  --x1: 2%;
+  --tx: 13s;
+  --o1: 0.55;
+  --to: 11s;
+  --do: -4s;
 }
 
 .glow__obstruction {
   background-image: url('../assets/light/layers/glow-obstruction.svg');
+  --x1: 2.5%;
+  --tx: 19s;
+  --dx: -11s;
+  --y1: 1.5%;
+  --ty: 23s;
 }
 
 /* luz de confirmação / rebote leve: the top of the compact confirmation.
@@ -283,102 +398,40 @@
   height: 422px;
 }
 
-.done-glow__lilac {
-  background-image: url('../assets/light/layers/done-lilac.svg');
-  transform-origin: 54.3% 46.9%;
+.done-glow__field {
+  --c: 233 152 120;
+  --a: 0.48;
+  --left: 29%;
+  --top: 12%;
+  --w: 50%;
+  --h: 65%;
+  --x0: -6%;
+  --x1: 8%;
+  --tx: 15s;
+  --dx: -2s;
+  --y0: -6%;
+  --y1: 7%;
+  --ty: 19s;
+  --dy: -9s;
+  --s0: 0.96;
+  --s1: 1.08;
+  --ts: 23s;
+  --o0: 0.75;
+  --o1: 1;
+  --to: 13s;
 }
 
 .done-glow__warm {
-  --tone: 0.7;
-  --tone-cycle: 61s;
-  --tone-delay: -12s;
-  transform-origin: 69.9% 55.2%;
-}
-
-.done-glow__warm::before {
-  content: '';
   background-image: url('../assets/light/layers/done-warm.svg');
-}
-
-.done-glow__warm::after {
-  content: '';
-  background-image: url('../assets/light/layers/done-warm-rose.svg');
-}
-
-/* On small screens the same idea, with smaller movements. */
-@media (prefers-reduced-motion: no-preference) {
-  .glow > span,
-  .done-glow > span {
-    will-change: transform, opacity;
-  }
-
-  .glow__warm {
-    animation: glow-breathe 15s ease-in-out infinite;
-  }
-
-  .glow__lilac {
-    animation: glow-drift 21s ease-in-out infinite;
-  }
-
-  .glow__threshold {
-    animation: glow-pulse 11s ease-in-out infinite;
-  }
-
-  .glow__obstruction {
-    animation: glow-sway 17s ease-in-out infinite;
-  }
-
-  .done-glow__lilac {
-    animation: glow-drift 19s ease-in-out infinite;
-  }
-
-  .done-glow__warm {
-    animation: glow-breathe 14s ease-in-out infinite;
-  }
-}
-
-@keyframes glow-breathe {
-  0%,
-  100% {
-    opacity: 1;
-    transform: none;
-  }
-  50% {
-    opacity: 0.74;
-    transform: translate(5px, -3px) scale(1.06);
-  }
-}
-
-@keyframes glow-drift {
-  0%,
-  100% {
-    opacity: 1;
-    transform: none;
-  }
-  50% {
-    opacity: 0.8;
-    transform: translate(-7px, 5px) scale(1.05);
-  }
-}
-
-@keyframes glow-pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: none;
-  }
-  50% {
-    opacity: 0.5;
-    transform: translate(3px, 1px);
-  }
-}
-
-@keyframes glow-sway {
-  0%,
-  100% {
-    transform: none;
-  }
-  50% {
-    transform: translate(5px, 2px);
-  }
+  --origin: 57% 35%;
+  --x1: 4%;
+  --tx: 17s;
+  --dx: -6s;
+  --y1: -3%;
+  --ty: 21s;
+  --s1: 1.06;
+  --ts: 25s;
+  --o1: 0.8;
+  --to: 15s;
+  --do: -8s;
 }

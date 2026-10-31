@@ -36,12 +36,33 @@ export async function fill(
   await page.getByLabel('seu WhatsApp').fill(typed);
 }
 
-/** Stops every light animation at the same point (0 to 1) of its own cycle. */
+/** Waits for the page's own motion (arrivals, message fades) to end; the light goes on. */
+export async function settled(page: Page) {
+  await page.waitForFunction(() =>
+    document.getAnimations().every((animation) => {
+      const target = (animation.effect as KeyframeEffect).target;
+      return target?.closest('.light') || animation.playState === 'finished';
+    }),
+  );
+}
+
+/**
+ * Stops every light animation at the same point (0 to 1) of its own cycle,
+ * from its resting value to the other end, and lets the page's own
+ * arrivals finish.
+ */
 export async function holdLight(page: Page, phase: number) {
   await page.evaluate((phase) => {
     for (const animation of document.getAnimations()) {
+      const target = (animation.effect as KeyframeEffect).target;
+      if (!target?.closest('.light')) {
+        animation.finish();
+        continue;
+      }
       const { duration, delay } = animation.effect!.getTiming() as { duration: number; delay: number };
-      animation.currentTime = (((phase * duration - delay) % duration) + duration) % duration;
+      // Alternating: a whole cycle is there and back. A negative delay starts it partway.
+      const cycle = 2 * duration;
+      animation.currentTime = (((Math.min(phase, 0.999) * duration + delay) % cycle) + cycle) % cycle;
       animation.pause();
     }
   }, phase);

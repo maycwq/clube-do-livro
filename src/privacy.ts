@@ -5,6 +5,8 @@ import './styles/base.css';
 import './styles/light.css';
 import './styles/layout.css';
 import './styles/notice.css';
+import './styles/motion.css';
+import { setupLight } from './light.js';
 
 // Coming from the form, "voltar pro formulário" goes back in history, so the
 // answers already filled in are still there. Opened from anywhere else, it's
@@ -17,3 +19,5 @@ back?.addEventListener('click', (event) => {
     history.back();
   }
 });
+
+setupLight(document);

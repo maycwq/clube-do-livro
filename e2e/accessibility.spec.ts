@@ -1,9 +1,14 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { confirmation, contrast, fill, holdLight, phone, rgb, submitButton, worstContrastUnderText } from './helpers.js';
+import { confirmation, contrast, fill, holdLight, phone, rgb, settled, submitButton, worstContrastUnderText } from './helpers.js';
 
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
-const audit = (page: Page) => new AxeBuilder({ page }).withTags(WCAG).analyze();
+// Audited as read: once what arrives has arrived (axe counts the opacity of
+// text that is still fading in).
+const audit = async (page: Page) => {
+  await settled(page);
+  return new AxeBuilder({ page }).withTags(WCAG).analyze();
+};
 
 test.describe('axe (WCAG 2.2 A and AA)', () => {
   test('the form, with and without errors', async ({ page }) => {
@@ -68,11 +73,10 @@ test.describe('contrast', () => {
     }
   });
 
-  // Each layer stopped at the same point of its own cycle: at rest, where
-  // each one is furthest from rest (35%, 50%, 70%) and where its second
-  // color is strongest (76%). The panel is checked at the frame's height
-  // and on a short window, where the epilogue sits over the light.
-  const phases = [0, 0.35, 0.5, 0.7, 0.76];
+  // Every light animation stopped at the same point of its own cycle, from
+  // rest to the other end. The panel is checked at the frame's height and
+  // on a short window, where the epilogue sits over the light.
+  const phases = [0, 0.25, 0.5, 0.75, 1];
   const large = 3;
   const normal = 4.5;
 

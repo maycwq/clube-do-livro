@@ -1,0 +1,189 @@
+/* The page's own motion ------------------------------------------------------
+
+   Separate from the light (light.css), and rare: it happens when something
+   arrives or changes, then the composition rests. The surface comes first;
+   what's written on it comes a moment later, all together, with tens of
+   milliseconds between related pieces. No bounce, no overshoot: speed
+   builds up gently and is lost over a long, controlled landing.
+
+   Fields and buttons don't wait: the form is usable from the first frame,
+   and nothing here runs when the person types, picks or sends, apart from
+   a short fade on messages. */
+
+:root {
+  /* Arrivals: quick start, long landing. */
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+  --arrive: 1100ms;
+  --reveal: 800ms;
+}
+
+@keyframes arrive {
+  from {
+    transform: translateY(var(--from-y, 36px));
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(var(--from-y, 12px));
+  }
+}
+
+@keyframes light-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Opening the page. The light comes up and the text with it; the form
+     follows almost at once. */
+  .opening > .light {
+    animation: light-in 1600ms ease-out 120ms backwards;
+  }
+
+  .opening__stage .light {
+    animation: light-in 1600ms ease-out 260ms backwards;
+  }
+
+  .opening > :not(.light, .opening__stage) {
+    animation: reveal var(--reveal) var(--ease-settle) backwards;
+    animation-delay: calc(160ms + var(--order, 0) * 50ms);
+  }
+
+  .opening__meta,
+  .opening__rubric {
+    --order: 0;
+  }
+
+  .opening__headline {
+    --order: 1;
+  }
+
+  .opening__proposal {
+    --order: 2;
+  }
+
+  .opening__context {
+    --order: 3;
+  }
+
+  .opening__epilogue {
+    --order: 4;
+  }
+
+  .form-column {
+    --from-y: 16px;
+    animation: reveal 700ms var(--ease-settle) 90ms backwards;
+  }
+
+  /* The confirmation is a new scene, not the form transformed: the form
+     goes at once, its light comes up and then what it says. */
+  .done__panel > .light {
+    animation: light-in 1400ms ease-out 200ms backwards;
+  }
+
+  .done__identity,
+  .done__meta,
+  .done__title,
+  .done__closing,
+  .done__content > *,
+  .done-view > .signature {
+    animation: reveal var(--reveal) var(--ease-settle) backwards;
+    animation-delay: calc(180ms + var(--order, 0) * 60ms);
+  }
+
+  .done__title {
+    --order: 1;
+  }
+
+  .done__content > :nth-child(1) {
+    --order: 2;
+  }
+
+  .done__content > :nth-child(2) {
+    --order: 3;
+  }
+
+  .done__content > :nth-child(n + 3) {
+    --order: 4;
+  }
+
+  .done__closing,
+  .done-view > .signature {
+    --order: 5;
+  }
+
+  /* On wide screens the panels are surfaces: they're there, dark, from the
+     first frame and settle into place, and their light and text come up in
+     them. The confirmation's arrives from below, continuing the page's way
+     up. */
+  @media (min-width: 1240px) {
+    .opening {
+      animation: arrive var(--arrive) var(--ease-settle) backwards;
+    }
+
+    .done__panel {
+      --from-y: 48px;
+      animation: arrive 1000ms var(--ease-settle) backwards;
+    }
+  }
+
+  /* The privacy notice: the light comes up, the text with it. */
+  .notice > .light {
+    animation: light-in 1400ms ease-out backwards;
+  }
+
+  .notice > :not(.light) {
+    animation: reveal var(--reveal) var(--ease-settle) backwards;
+    animation-delay: calc(120ms + var(--order, 0) * 60ms);
+  }
+
+  .notice__body {
+    --order: 1;
+  }
+
+  .notice__back {
+    --order: 2;
+  }
+}
+
+/* With reduced motion nothing travels: content that arrives only fades in,
+   briefly, and the light is there from the start. */
+@media (prefers-reduced-motion: reduce) {
+  .opening > :not(.light, .opening__stage),
+  .form-column,
+  .done__panel,
+  .done__title,
+  .done__content,
+  .done__closing,
+  .notice > :not(.light) {
+    animation: appear 200ms ease-out backwards;
+  }
+}
+
+/* Feedback: a message near a field, or a failure under the button, fades in
+   where it appears. Short, so it never holds up the next action. */
+.error:not([hidden]) {
+  --from-y: -3px;
+  animation: reveal 180ms ease-out backwards;
+}
+
+.failure > * {
+  --from-y: 4px;
+  animation: reveal 240ms ease-out backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .error:not([hidden]),
+  .failure > * {
+    animation: appear 120ms ease-out backwards;
+  }
+}

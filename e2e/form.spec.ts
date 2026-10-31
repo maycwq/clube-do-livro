@@ -586,19 +586,73 @@ test('the whole form works from the keyboard', async ({ page }, testInfo) => {
   ]);
 });
 
-test('the light only moves when motion is welcome, and only with transform and opacity', async ({ page }) => {
-  await page.goto('/');
-  const animated = () =>
+test.describe('motion', () => {
+  const lightProperties = (page: Page) =>
     page.evaluate(() =>
       document.getAnimations().flatMap((animation) => {
-        const frames = (animation.effect as KeyframeEffect).getKeyframes();
-        return frames.flatMap((frame) => Object.keys(frame).filter((key) => !['offset', 'computedOffset', 'easing', 'composite'].includes(key)));
+        const effect = animation.effect as KeyframeEffect;
+        if (!effect.target?.closest('.light')) return [];
+        return effect.getKeyframes().flatMap((frame) => Object.keys(frame).filter((key) => !['offset', 'computedOffset', 'easing', 'composite'].includes(key)));
       }),
     );
-  const properties = await animated();
-  expect(properties.length).toBeGreaterThan(0);
-  expect(new Set(properties)).toEqual(new Set(['opacity', 'transform']));
 
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  expect(await animated()).toEqual([]);
+  test('the light only moves when motion is welcome, and only with transform and opacity', async ({ page }) => {
+    await page.goto('/');
+    const properties = await lightProperties(page);
+    expect(properties.length).toBeGreaterThan(0);
+    expect(new Set(properties)).toEqual(new Set(['translate', 'transform', 'scale', 'rotate', 'opacity']));
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    expect(await lightProperties(page)).toEqual([]);
+  });
+
+  test('the page moves when it opens and when the answer is confirmed, then rests; only the light keeps going', async ({ page }, testInfo) => {
+    const pageMotion = () =>
+      page.evaluate(() =>
+        document.getAnimations().filter((animation) => !(animation.effect as KeyframeEffect).target?.closest('.light')).length,
+      );
+    await page.goto('/');
+    expect(await pageMotion()).toBeGreaterThan(0);
+    await expect.poll(pageMotion, { timeout: 3000 }).toBe(0);
+
+    // Nothing waits for the arrival: the form takes answers right away.
+    await page.reload();
+    await page.getByLabel('sim, eu toparia').check();
+    await expect(page.getByLabel('sim, eu toparia')).toBeChecked();
+
+    await fill(page, phone(testInfo));
+    await submitButton(page).click();
+    await expect(confirmation(page)).toBeFocused();
+    expect(await pageMotion()).toBeGreaterThan(0);
+    await expect.poll(pageMotion, { timeout: 3000 }).toBe(0);
+  });
+
+  test('with reduced motion, what arrives only fades in, briefly', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+    const arrivals = await page.evaluate(() =>
+      document.getAnimations().map((animation) => {
+        const effect = animation.effect as KeyframeEffect;
+        return {
+          duration: Number(effect.getTiming().duration),
+          properties: [...new Set(effect.getKeyframes().flatMap((frame) => Object.keys(frame)))].filter((key) => !['offset', 'computedOffset', 'easing', 'composite'].includes(key)),
+        };
+      }),
+    );
+    for (const arrival of arrivals) {
+      expect(arrival.properties).toEqual(['opacity']);
+      expect(arrival.duration).toBeLessThanOrEqual(200);
+    }
+  });
+
+  test('the light stops when it is out of view and goes on when it is back', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'on wide screens the panel stays in view');
+    await page.goto('/');
+    const glow = page.locator('.opening__glow');
+    await expect(glow).not.toHaveAttribute('data-paused');
+    await page.getByRole('button', { name: 'quero acompanhar o clube' }).scrollIntoViewIfNeeded();
+    await expect(glow).toHaveAttribute('data-paused', '');
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(glow).not.toHaveAttribute('data-paused');
+  });
 });
