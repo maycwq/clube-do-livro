@@ -1,19 +1,42 @@
-/* Two compositions. Compact (up to 1199px): one column, at most 390px wide,
-   following the 390 frames, with the 320 frame's sizes below 360px and the
-   768 frame's top and bottom space from 640px. Wide (1200px and up): the
-   editorial panel next to the form, following the 1440 frames; margins and
-   gap shrink linearly down to 1200px. */
+/* Page width and gutters ---------------------------------------------------
 
+   One layer per job:
+   - .page (the shell, on every page) is the only one with a side margin,
+     --page-gutter;
+   - .view (the container) only limits the width and centers it;
+   - sections inside line up on the container's edges, and components keep
+     only their own inner padding.
+
+   Two compositions. Stacked, up to 1239px: one column, the phone frames'
+   composition, up to 720px wide. Two columns from 1240px, the first width
+   where the editorial panel keeps the frame's 560px and the form still
+   gets about 540px (docs/product-decisions.md, layout). Past that, both
+   grow in the 1440 frame's proportion (560 : 650), up to a 1600px
+   container. */
+
+:root {
+  /* 24px as in the phone frames up to 800px, then 3% of the window, up to 64px. */
+  --page-gutter: clamp(24px, 3vw, 64px);
+  --stack-max: 720px;
+  --page-max: 1600px;
+  --page-column-gap: clamp(40px, 5vw, 80px);
+  /* Line length for running text, whatever the width of its column. */
+  --measure: 66ch;
+}
+
+/* The light masses are meant to run off the edge of the screen (light.css);
+   the shell cuts them there. Nothing in the layout is wider than the page. */
 .page {
+  padding-inline: var(--page-gutter);
   overflow-x: clip;
 }
 
 .view {
-  max-width: 390px;
+  max-width: var(--stack-max);
   margin-inline: auto;
 }
 
-@media (min-width: 640px) and (max-width: 1199px) {
+@media (min-width: 640px) and (max-width: 1239px) {
   .page {
     padding-block: 30px 22px;
   }
@@ -21,18 +44,35 @@
 
 /* --edge is the space above and below the panels: 60px as in the frames,
    less on short windows, down to 24px. */
-@media (min-width: 1200px) {
+@media (min-width: 1240px) {
   .view {
-    --page-margin: clamp(40px, 12.5vw - 110px, 70px);
     --edge: clamp(24px, 12svh - 48px, 60px);
-    max-width: 1440px;
-    padding: var(--edge) var(--page-margin);
+    max-width: var(--page-max);
+    padding-block: var(--edge);
   }
+}
+
+/* Running text keeps a comfortable line length; headings, choices, fields
+   and the button use the whole column. */
+.opening__proposal,
+.opening__context,
+.note,
+.interlude__text,
+.help,
+.submit__consent,
+.submit__privacy,
+.failure,
+.done__thanks,
+.done__status,
+.done__test-invite,
+.notice__lead,
+.notice__section {
+  max-width: var(--measure);
 }
 
 /* rodapé / assinatura editorial */
 .signature {
-  padding: 40px 24px 44px;
+  padding-block: 40px 44px;
   font-size: 12px;
   line-height: 17px;
   font-weight: 500;
@@ -40,9 +80,9 @@
   color: var(--texto-suave);
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1240px) {
   .signature {
-    padding: 24px 0 2px;
+    padding-block: 24px 2px;
   }
 }
 
@@ -54,15 +94,16 @@
   display: flex;
   flex-direction: column;
   gap: 15px;
-  padding: 30px 24px 34px;
+  padding-block: 30px 34px;
 }
 
-/* At 320 the 390 composition moves about 54px to the left: anchored in
-   between the two frames, it lands on both. The layers carry 60px of
+/* Runs 194px past the column's right edge, as in the 390 frame, and the
+   screen's edge cuts it. On columns narrower than that frame's, a little
+   further, which lands it on the 320 frame too. The layers carry 60px of
    margin for the blur (light.css). */
 .opening__glow {
   top: -131px;
-  left: calc((min(100vw, 390px) - 390px) * 0.77 - 60px);
+  right: calc(-194px - max(0px, 342px - 100%) * 0.23);
 }
 
 .opening__meta {
@@ -106,11 +147,14 @@
   color: var(--ameixa);
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1240px) {
+  /* The frame's 560 and 650 as proportions of the width there is; the panel
+     never gets narrower than its 560px, where its text and its light were
+     composed. */
   .form-view {
     display: grid;
-    grid-template-columns: 560px minmax(0, 650px);
-    column-gap: clamp(48px, 12.5vw - 102px, 78px);
+    grid-template-columns: minmax(560px, 560fr) minmax(0, 650fr);
+    column-gap: var(--page-column-gap);
     align-items: start;
   }
 
@@ -183,10 +227,11 @@
      bright edge of the light sits under "comentar" at 3:1; here the
      proposal stays above 4.5:1. On shorter panels the light keeps that
      place and loses some of its lower part, instead of moving under the
-     text. */
+     text. Horizontally it keeps the frame's distance to the panel's right
+     edge, which cuts it, whatever the panel's width. */
   .opening__atmosphere {
     top: calc(-215px - var(--panel-gap));
-    left: 42px;
+    left: calc(100% - 432px);
   }
 
   /* White instead of the frame's papel-quente: on panels shorter than the

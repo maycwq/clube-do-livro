@@ -61,15 +61,15 @@ input {
   border: 0;
 }
 
-/* Breakpoint-specific copy and line breaks: the compact layout goes up to
-   1199px, the wide one starts at 1200px. */
-@media (min-width: 1200px) {
+/* Breakpoint-specific copy and line breaks: the stacked layout goes up to
+   1239px, the two columns start at 1240px (layout.css). */
+@media (min-width: 1240px) {
   .only-compact {
     display: none !important;
   }
 }
 
-@media (max-width: 1199px) {
+@media (max-width: 1239px) {
   .only-wide {
     display: none !important;
   }

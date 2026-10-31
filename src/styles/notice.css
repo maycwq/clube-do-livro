@@ -1,15 +1,17 @@
 /* "como usamos seus dados": a reading page in the form's type scale, with the
-   opening light at the top. */
+   opening light at the top. Its container is a reading column, 650px at
+   most; the side margin is the page's (layout.css). */
 
-.notice {
+.view.notice {
   position: relative;
   isolation: isolate;
-  padding: 30px 24px 0;
+  max-width: 650px;
+  padding-top: 30px;
 }
 
 .notice__glow {
   top: -131px;
-  left: calc((min(100vw, 390px) - 390px) * 0.77 - 60px);
+  right: calc(-194px - max(0px, 342px - 100%) * 0.23);
 }
 
 .notice__title {
@@ -92,18 +94,17 @@
 }
 
 .notice__signature {
-  max-width: 390px;
+  max-width: 650px;
   margin-inline: auto;
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1240px) {
   .view.notice {
-    max-width: 650px;
-    padding: 60px 0 0;
+    padding-block: 60px 0;
   }
 
   .notice__glow {
-    left: 90px;
+    right: -60px;
   }
 
   .notice__title {
@@ -122,7 +123,6 @@
   }
 
   .notice__signature {
-    max-width: 650px;
-    padding: 40px 0 60px;
+    padding-block: 40px 60px;
   }
 }

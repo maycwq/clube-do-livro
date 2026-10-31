@@ -9,7 +9,7 @@
   padding-bottom: 11px;
 }
 
-@media (min-width: 640px) and (max-width: 1199px) {
+@media (min-width: 640px) and (max-width: 1239px) {
   .done-view {
     min-height: calc(100svh - 52px);
   }
@@ -20,7 +20,7 @@
   isolation: isolate;
   flex: none;
   height: 182px;
-  padding: 29px 24px 0;
+  padding-top: 29px;
   overflow-x: visible;
   overflow-y: clip;
 }
@@ -30,16 +30,17 @@
   content: '';
   position: absolute;
   top: 148px;
-  right: 24px;
-  left: 24px;
+  right: 0;
+  left: 0;
   height: 2px;
   background: var(--acento);
 }
 
-/* Same anchoring as the opening light (layout.css). */
+/* Same anchoring as the opening light (layout.css): 171px past the
+   column's right edge, as in the 390 frame. */
 .done__glow {
   top: -158px;
-  left: calc((min(100vw, 390px) - 390px) * 0.77 - 60px);
+  right: calc(-171px - max(0px, 342px - 100%) * 0.23);
 }
 
 .done__identity {
@@ -59,7 +60,7 @@
 
 .done__title {
   min-height: 74px;
-  margin: 36px 24px 0;
+  margin-top: 36px;
   font-family: var(--fonte-titulo);
   font-variation-settings: var(--fraunces-eixos);
   font-weight: 700;
@@ -74,7 +75,7 @@
 .done__content {
   display: flex;
   flex-direction: column;
-  padding: 25px 24px 0;
+  padding-top: 25px;
 }
 
 .done__thanks {
@@ -108,7 +109,7 @@
 
 .done__closing {
   margin-top: auto;
-  padding: 40px 24px 2px;
+  padding: 40px 0 2px;
   font-size: 14px;
   line-height: 20px;
   font-weight: 500;
@@ -116,19 +117,21 @@
 }
 
 .done-view .signature {
-  padding: 22px 24px 2px;
+  padding-block: 22px 2px;
 }
 
 /* Wide: the 1440 × 900 frame. Panel, title and closing share the first
    grid cell. The panel is as tall as the form's (layout.css), which at
-   900px is the frame's 780px; the closing sits at its bottom. */
+   900px is the frame's 780px; the closing sits at its bottom. The columns
+   are the form's, so going from one view to the other nothing moves
+   sideways. */
 
-@media (min-width: 1200px) {
+@media (min-width: 1240px) {
   .done-view {
     display: grid;
-    grid-template-columns: 560px minmax(0, 650px);
+    grid-template-columns: minmax(560px, 560fr) minmax(0, 650fr);
     grid-template-rows: auto auto;
-    column-gap: clamp(60px, 12.5vw - 90px, 90px);
+    column-gap: var(--page-column-gap);
     align-items: start;
     min-height: 0;
   }
@@ -154,7 +157,7 @@
   .done__atmosphere {
     --ambient: 0.755;
     top: max(198px, 100% - 582px);
-    left: 85px;
+    left: calc(100% - 475px);
   }
 
   .done__identity {

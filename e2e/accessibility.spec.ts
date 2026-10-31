@@ -88,6 +88,7 @@ test.describe('contrast', () => {
   }
 
   test('text over the light stays readable through its whole cycle', async ({ page }, testInfo) => {
+    test.slow(); // about 50 screenshots
     if (testInfo.project.name === 'desktop') {
       for (const height of [900, 720]) {
         await page.setViewportSize({ width: 1440, height });
@@ -115,6 +116,7 @@ test.describe('contrast', () => {
   });
 
   test('the confirmation and the privacy notice too', async ({ page }, testInfo) => {
+    test.slow();
     const desktop = testInfo.project.name === 'desktop';
     if (desktop) await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/');

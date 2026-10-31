@@ -1,9 +1,7 @@
-/* Sections of the form. Some text boxes in the frames are taller than their
-   lines; those heights are kept as min-height so the vertical rhythm matches. */
-
-.block {
-  padding-inline: 24px;
-}
+/* Sections of the form. They line up on the page's edges (layout.css); the
+   only side padding here is inside components. Some text boxes in the
+   frames are taller than their lines; those heights are kept as min-height
+   so the vertical rhythm matches. */
 
 .interest {
   display: flex;
@@ -27,9 +25,11 @@
 
 /* Questions: native radio groups under a legend ------------------------- */
 
+/* About 24 characters wide at most, so the questions break as in the frames
+   however wide the column gets. */
 .question__title {
   display: block;
-  width: 100%;
+  max-width: 24em;
   margin-bottom: 12px;
   font-family: var(--fonte-titulo);
   font-variation-settings: var(--fraunces-eixos);
@@ -120,13 +120,13 @@
 
 /* Optional test invite ----------------------------------------------------- */
 
+/* The text sits 20px from the editorial line, 14px at 320 as in that frame. */
 .interlude {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 29px clamp(18px, 18px + (100vw - 320px) * 6 / 70, 24px) 30px
-    clamp(38px, 38px + (100vw - 320px) * 6 / 70, 44px);
+  padding: 29px 0 30px clamp(14px, 14px + (100vw - 320px) * 6 / 70, 20px);
 }
 
 /* margem editorial / opt-in independente */
@@ -135,7 +135,7 @@
   position: absolute;
   top: 28px;
   bottom: 28px;
-  left: 24px;
+  left: 0;
   width: 2px;
   background: var(--acento);
 }
@@ -204,11 +204,11 @@
   border-width: 2.5px;
 }
 
-/* 285px wide as in the component, so it stays on one line at 320 too; the
-   viewport cap keeps it from ever running off screen. */
+/* At most 285px, as in the component. */
 .check__label {
-  flex: 0 0 auto;
-  max-width: min(285px, 100vw - 82px);
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 285px;
   font-weight: 500;
   font-size: 15px;
   line-height: normal;
@@ -430,11 +430,7 @@
 
 /* 1440 frame --------------------------------------------------------------- */
 
-@media (min-width: 1200px) {
-  .block {
-    padding: 0;
-  }
-
+@media (min-width: 1240px) {
   .form,
   .interest,
   .contact {
@@ -473,7 +469,6 @@
 
   .interlude::before {
     top: 18px;
-    left: 0;
   }
 
   .interlude__title {

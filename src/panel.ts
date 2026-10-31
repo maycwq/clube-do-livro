@@ -5,7 +5,7 @@ export function setupPanel(document: Document): void {
   const panel = document.querySelector<HTMLElement>('.opening');
   const view = panel?.parentElement;
   if (!panel || !view) return;
-  const wide = matchMedia('(min-width: 1200px)');
+  const wide = matchMedia('(min-width: 1240px)');
 
   const update = () => {
     const edge = parseFloat(getComputedStyle(view).paddingTop);
