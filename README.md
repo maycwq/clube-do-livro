@@ -10,8 +10,8 @@ At this stage the club only wants to know who would join and how to reach them o
 
 The Figma file is the source for interface, copy, hierarchy, responsive behavior and states:
 
-- [clube do livro · alta fidelidade](https://www.figma.com/design/bPIkvsOd4llum9EBLyl2Zg/clube-do-livro?node-id=3233-11): form and confirmation at 390 and 1440, responsive proofs at 320 and 768, components, states and behavior notes;
-- [comunidade](https://www.figma.com/design/L095OwMoiSvr0R0tRDLyTH/comunidade?node-id=1409-47): the visual library the screens draw from.
+- [clube do livro · alta fidelidade]: form and confirmation at 390 and 1440, responsive proofs at 320 and 768, components, states and behavior notes;
+- [comunidade]: the visual library the screens draw from.
 
 The interface copy is Brazilian Portuguese, lowercase and without emoji. Decisions taken where the file is silent, ambiguous or contradicts itself, and the few places where the implementation departs from it for accessibility, are in [docs/product-decisions.md](docs/product-decisions.md), together with what is still open.
 
