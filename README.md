@@ -104,15 +104,18 @@ privacidade.html           "como usamos seus dados"
 src/
   main.ts, privacy.ts      entries of the two pages
   form.ts                  validation display, sending, failures, confirmation
+  panel.ts                 whether the desktop panel fits the window, to stick
   messages.ts              the copy the script shows: field errors, sending, failures
   styles/
     tokens.css             Figma variables and the values the frames use directly
     fonts.css, base.css
-    layout.css             compact and wide compositions, light masses, sticky panel
+    layout.css             compact and wide compositions, the desktop panel
+    light.css              light masses: layers, motion, color
     form.css               questions, options, checkbox, fields, button, statuses
     confirmation.css, notice.css
   assets/
-    light/                 light masses, exported from the Figma file
+    light/layers/          light masses from the Figma file, one blurred SVG per shape
+    light/atmosphere-form.svg  the desktop group whole, for the link preview image
     icons/                 radio and the PikaIcons check, exported from the Figma file
 public/og.jpg              link preview image
 shared/interest.ts         fields, options, normalization and validation (page and API)
@@ -131,9 +134,11 @@ scripts/                   Satoshi download, schema migration, preview image
 Two compositions, following the frames:
 
 - **compact**, up to 1199 px: a single column, at most 390 px wide and centered, as in the 390 and 768 frames. Below 360 px the sizes come from the 320 frame; between 320 and 390 type scales linearly between the two. From 640 px the page gets the 768 frame's space at the top.
-- **wide**, from 1200 px: the editorial panel next to the form, as in the 1440 frames. The panel is sticky. Between 1200 and 1440 px the outer margin and the gap shrink linearly; above 1440 the composition stays centered.
+- **wide**, from 1200 px: the editorial panel next to the form, as in the 1440 frames. Between 1200 and 1440 px the outer margin and the gap shrink linearly; above 1440 the composition stays centered.
 
-The light masses are the SVG groups exported from the file, blur included. They drift a few pixels (up to 8 on desktop, 4 on mobile) over 14 seconds, and stay still under `prefers-reduced-motion`.
+The desktop panel follows the window's height too. From 1060 px it's the frame's 940 px, 60 px from the top. On shorter windows it takes the height of the window minus a margin (60 px, down to 24 px), and the headline and the space around the text scale with that height, from the frame's sizes at 900 px down to a floor at 640 px; the proposal, the context and the epilogue keep their size. It sticks next to the form only when it fits whole in the window (`panel.ts`); on windows too short even for its floor (below about 600 px) it scrolls with the page. It never scrolls on its own. The confirmation panel takes the same height.
+
+The light masses are the Figma groups split into their shapes, one blurred SVG per layer, stacked as in the file; at rest they are the frame. Each layer moves on its own slow cycle (11 to 29 s): the source dims and opens a little away from the text, the bounce breathes, the reflection and the edge that hides the source drift. Now and then part of the light turns more golden, rosier or lilac (cycles of 43 to 83 s). Only `transform` and `opacity` change, the light never gets stronger than at rest, and under `prefers-reduced-motion` it stays still.
 
 ### fonts
 
@@ -246,4 +251,4 @@ Then take care of the copies:
 ## tests
 
 - `npm test` (Vitest): phone and name normalization, validation rules with the reason for each error, and the API handler against a real Postgres (PGlite): storage; stored answers never overwritten by a later submission, including someone else's test invite turned on or off; the same answer whatever was recorded; identical answers and retries recorded once; concurrent submissions for a new number; change requests deleted with their response; 400/403/405/413/415/422/429 answers; `not_stored` and `unconfirmed` failures; the hidden field; rate limiting and hash retention; no personal data in logs. It also checks that the texts stored for the current consent version match the form and the privacy notice.
-- `npm run test:e2e` (Playwright, on a Pixel 7 profile and a 1440 × 900 desktop): nothing flagged before the first attempt; empty, whitespace-only and malformed fields with their messages and focus on the first one; errors clearing while typing and coming back only when leaving the field; storage and confirmation; the test invite stored on its own; the sending state for sighted and screen reader users and double clicks; each kind of failure, including an answer lost after the write and a 429 that is respected; numbers already stored; the privacy notice and coming back to the form with the answers kept; the whole flow by keyboard; axe (WCAG 2.2 A and AA) on the form, its errors, a failure, the confirmation and the notice; contrast of field borders, the button and every text over the light masses; the four reference widths; and the link preview metadata and image.
+- `npm run test:e2e` (Playwright, on a Pixel 7 profile and a 1440 × 900 desktop): nothing flagged before the first attempt; empty, whitespace-only and malformed fields with their messages and focus on the first one; errors clearing while typing and coming back only when leaving the field; storage and confirmation; the test invite stored on its own; the sending state for sighted and screen reader users and double clicks; each kind of failure, including an answer lost after the write and a 429 that is respected; numbers already stored; the privacy notice and coming back to the form with the answers kept; the whole flow by keyboard; axe (WCAG 2.2 A and AA) on the form, its errors, a failure, the confirmation and the notice; contrast of field borders, the button and every text over the light masses (form, confirmation and notice) at rest and at the extremes of each layer's cycle, on a tall and a short window; the light moving only through transform and opacity, and not at all with reduced motion; the four reference widths; the desktop panel whole and in view from top to end at six window sizes, with no scroll of its own, scrolling with the page when the window is too short, and the confirmation's closing line inside its panel; and the link preview metadata and image.

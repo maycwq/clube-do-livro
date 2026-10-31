@@ -36,6 +36,17 @@ export async function fill(
   await page.getByLabel('seu WhatsApp').fill(typed);
 }
 
+/** Stops every light animation at the same point (0 to 1) of its own cycle. */
+export async function holdLight(page: Page, phase: number) {
+  await page.evaluate((phase) => {
+    for (const animation of document.getAnimations()) {
+      const { duration, delay } = animation.effect!.getTiming() as { duration: number; delay: number };
+      animation.currentTime = (((phase * duration - delay) % duration) + duration) % duration;
+      animation.pause();
+    }
+  }, phase);
+}
+
 export const submitButton = (page: Page) => page.getByRole('button', { name: 'quero acompanhar o clube' });
 export const confirmation = (page: Page) => page.getByRole('heading', { level: 1, name: /anotado/ });
 export const optInNote = (page: Page) => page.getByText('também anotamos seu interesse em testar a experiência digital.');

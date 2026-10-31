@@ -1,0 +1,384 @@
+/* Light masses ---------------------------------------------------------------
+
+   Each light group of the Figma file is split into its shapes, one blurred
+   SVG per layer (assets/light/layers), stacked in the file's order. At rest
+   the stack is the frame's composition, which is what prefers-reduced-motion
+   shows.
+
+   In motion it behaves like late sun through an opening: each layer has its
+   own slow cycle, so the source breathes (intensity), opens and closes a
+   little (size), its incidence and reflections drift, and now and then
+   part of the warm light turns more golden, rosier or lilac. The
+   cycles have different, unrelated lengths, so the combination doesn't
+   repeat in any noticeable way. Movement stays away from the text, and the
+   light never gets brighter than at rest, so contrast holds at every moment.
+
+   Only opacity and transform are animated: the browser composites the
+   layers without layout or repaint. */
+
+.light {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.light > span,
+.light > span::before,
+.light > span::after {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+/* A layer that changes color carries both images: the usual one in
+   ::before and the other in ::after, which stays away most of the time and
+   now and then slowly takes over part of it. One recedes exactly as much as
+   the other comes in, so the light changes temperature without getting
+   any stronger. */
+.light > span::after {
+  opacity: 0;
+}
+
+@keyframes tone-in {
+  0%,
+  52%,
+  100% {
+    opacity: 0;
+  }
+  76% {
+    opacity: var(--tone);
+  }
+}
+
+@keyframes tone-out {
+  0%,
+  52%,
+  100% {
+    opacity: 1;
+  }
+  76% {
+    opacity: calc(1 - var(--tone));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .light > span::before,
+  .light > span::after {
+    will-change: opacity;
+    animation: tone-out var(--tone-cycle) ease-in-out var(--tone-delay, 0s) infinite;
+  }
+
+  .light > span::after {
+    animation-name: tone-in;
+  }
+}
+
+/* atmosfera editorial / fonte oculta + reflexo: the desktop panels.
+   The group is 523 × 432 in the file; layers add 60px around it for the blur. */
+
+.atmosphere {
+  width: 643px;
+  height: 552px;
+}
+
+/* The bounce of the light in the room, now and then rosier. */
+.atmosphere__ambient {
+  --tone: 0.7;
+  --tone-cycle: 71s;
+  transform-origin: 55.2% 51.4%;
+  opacity: var(--ambient, 1);
+}
+
+.atmosphere__ambient::before {
+  content: '';
+  background-image: url('../assets/light/layers/atmosphere-ambient.svg');
+}
+
+.atmosphere__ambient::after {
+  content: '';
+  background-image: url('../assets/light/layers/atmosphere-ambient-rose.svg');
+}
+
+/* The source behind the opening: peach, at times more golden. */
+.atmosphere__aperture {
+  --tone: 0.75;
+  --tone-cycle: 43s;
+  --tone-delay: -11s;
+  transform-origin: 55.2% 43.7%;
+}
+
+.atmosphere__aperture::before {
+  content: '';
+  background-image: url('../assets/light/layers/atmosphere-aperture.svg');
+}
+
+.atmosphere__aperture::after {
+  content: '';
+  background-image: url('../assets/light/layers/atmosphere-aperture-gold.svg');
+}
+
+/* The reflection on the floor, at times lilac. */
+.atmosphere__band {
+  --tone: 0.7;
+  --tone-cycle: 83s;
+  --tone-delay: -30s;
+}
+
+.atmosphere__band::before {
+  content: '';
+  background-image: url('../assets/light/layers/atmosphere-band.svg');
+}
+
+.atmosphere__band::after {
+  content: '';
+  background-image: url('../assets/light/layers/atmosphere-band-lilac.svg');
+}
+
+.atmosphere__obstruction {
+  background-image: url('../assets/light/layers/atmosphere-obstruction.svg');
+}
+
+.atmosphere__residual {
+  background-image: url('../assets/light/layers/atmosphere-residual.svg');
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .atmosphere > span {
+    will-change: transform, opacity;
+  }
+
+  /* The bounce of the light in the room: breathes and spreads. */
+  .atmosphere__ambient {
+    animation: ambient-breathe 17s ease-in-out infinite;
+  }
+
+  /* The source behind the opening: dims, widens away from the text, moves
+     its incidence to the right and down. */
+  .atmosphere__aperture {
+    animation: aperture-shift 23s ease-in-out infinite;
+  }
+
+  /* The reflection on the floor glides and fades. */
+  .atmosphere__band {
+    animation: band-glide 29s ease-in-out infinite;
+  }
+
+  /* The edge that hides the source shifts a little, so the cut of light
+     changes. */
+  .atmosphere__obstruction {
+    animation: shade-sway 19s ease-in-out infinite;
+  }
+
+  .atmosphere__residual {
+    animation: residual-glint 13s ease-in-out infinite;
+  }
+}
+
+@keyframes ambient-breathe {
+  0%,
+  100% {
+    opacity: var(--ambient, 1);
+    transform: none;
+  }
+  50% {
+    opacity: calc(var(--ambient, 1) * 0.68);
+    transform: translate(-8px, 6px) scale(1.07);
+  }
+}
+
+@keyframes aperture-shift {
+  0%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+  35% {
+    opacity: 0.88;
+    transform: translate(7px, 3px) scaleX(1.04);
+  }
+  70% {
+    opacity: 0.76;
+    transform: translate(14px, 8px) scaleX(0.97);
+  }
+}
+
+@keyframes band-glide {
+  0%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+  50% {
+    opacity: 0.66;
+    transform: translate(-14px, 6px);
+  }
+}
+
+@keyframes shade-sway {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: translate(6px, -4px);
+  }
+}
+
+@keyframes residual-glint {
+  0%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+  50% {
+    opacity: 0.5;
+    transform: translate(12px, 2px);
+  }
+}
+
+/* luz editorial / fonte lateral com obstrução: the top of the compact page
+   and the privacy notice. Frame coordinates, 500 × 532 from y -71, plus 60px. */
+
+.glow {
+  width: 620px;
+  height: 652px;
+}
+
+.glow__warm {
+  --tone: 0.7;
+  --tone-cycle: 61s;
+  --tone-delay: -12s;
+  transform-origin: 66.6% 48%;
+}
+
+.glow__warm::before {
+  content: '';
+  background-image: url('../assets/light/layers/glow-warm.svg');
+}
+
+.glow__warm::after {
+  content: '';
+  background-image: url('../assets/light/layers/glow-warm-rose.svg');
+}
+
+.glow__lilac {
+  background-image: url('../assets/light/layers/glow-lilac.svg');
+  transform-origin: 51% 34.4%;
+}
+
+.glow__threshold {
+  background-image: url('../assets/light/layers/glow-threshold.svg');
+}
+
+.glow__obstruction {
+  background-image: url('../assets/light/layers/glow-obstruction.svg');
+}
+
+/* luz de confirmação / rebote leve: the top of the compact confirmation.
+   477 × 302 in the file, plus 60px. */
+
+.done-glow {
+  width: 597px;
+  height: 422px;
+}
+
+.done-glow__lilac {
+  background-image: url('../assets/light/layers/done-lilac.svg');
+  transform-origin: 54.3% 46.9%;
+}
+
+.done-glow__warm {
+  --tone: 0.7;
+  --tone-cycle: 61s;
+  --tone-delay: -12s;
+  transform-origin: 69.9% 55.2%;
+}
+
+.done-glow__warm::before {
+  content: '';
+  background-image: url('../assets/light/layers/done-warm.svg');
+}
+
+.done-glow__warm::after {
+  content: '';
+  background-image: url('../assets/light/layers/done-warm-rose.svg');
+}
+
+/* On small screens the same idea, with smaller movements. */
+@media (prefers-reduced-motion: no-preference) {
+  .glow > span,
+  .done-glow > span {
+    will-change: transform, opacity;
+  }
+
+  .glow__warm {
+    animation: glow-breathe 15s ease-in-out infinite;
+  }
+
+  .glow__lilac {
+    animation: glow-drift 21s ease-in-out infinite;
+  }
+
+  .glow__threshold {
+    animation: glow-pulse 11s ease-in-out infinite;
+  }
+
+  .glow__obstruction {
+    animation: glow-sway 17s ease-in-out infinite;
+  }
+
+  .done-glow__lilac {
+    animation: glow-drift 19s ease-in-out infinite;
+  }
+
+  .done-glow__warm {
+    animation: glow-breathe 14s ease-in-out infinite;
+  }
+}
+
+@keyframes glow-breathe {
+  0%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+  50% {
+    opacity: 0.74;
+    transform: translate(5px, -3px) scale(1.06);
+  }
+}
+
+@keyframes glow-drift {
+  0%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+  50% {
+    opacity: 0.8;
+    transform: translate(-7px, 5px) scale(1.05);
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+  50% {
+    opacity: 0.5;
+    transform: translate(3px, 1px);
+  }
+}
+
+@keyframes glow-sway {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: translate(5px, 2px);
+  }
+}

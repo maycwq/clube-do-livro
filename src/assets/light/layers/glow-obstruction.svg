@@ -1,0 +1,8 @@
+<svg width="620" height="652" viewBox="-60 -131 620 652" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#f)"><rect x="264" y="80" width="45" height="198" transform="rotate(5 264 80)" fill="#FBF9F4" fill-opacity="0.52"/></g>
+<defs>
+<filter id="f" x="156.743" y="-10" width="242.086" height="381.169" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feGaussianBlur stdDeviation="15"/>
+</filter>
+</defs>
+</svg>

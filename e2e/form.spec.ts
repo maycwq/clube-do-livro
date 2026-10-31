@@ -358,9 +358,19 @@ test('the whole form works from the keyboard', async ({ page }, testInfo) => {
   ]);
 });
 
-test('the light only moves when motion is welcome', async ({ page }) => {
-  const animation = () => page.locator('.opening__light').evaluate((el) => getComputedStyle(el).animationName);
-  expect(await animation()).toBe('light-drift');
+test('the light only moves when motion is welcome, and only with transform and opacity', async ({ page }) => {
+  await page.goto('/');
+  const animated = () =>
+    page.evaluate(() =>
+      document.getAnimations().flatMap((animation) => {
+        const frames = (animation.effect as KeyframeEffect).getKeyframes();
+        return frames.flatMap((frame) => Object.keys(frame).filter((key) => !['offset', 'computedOffset', 'easing', 'composite'].includes(key)));
+      }),
+    );
+  const properties = await animated();
+  expect(properties.length).toBeGreaterThan(0);
+  expect(new Set(properties)).toEqual(new Set(['opacity', 'transform']));
+
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  expect(await animation()).toBe('none');
+  expect(await animated()).toEqual([]);
 });

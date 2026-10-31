@@ -37,12 +37,9 @@
 }
 
 /* Same anchoring as the opening light (layout.css). */
-.done__light {
-  top: -98px;
-  left: calc((min(100vw, 390px) - 390px) * 0.77);
-  width: 477px;
-  height: 302px;
-  background-image: url('../assets/light/confirmation-mobile.svg');
+.done__glow {
+  top: -158px;
+  left: calc((min(100vw, 390px) - 390px) * 0.77 - 60px);
 }
 
 .done__identity {
@@ -123,7 +120,8 @@
 }
 
 /* Wide: the 1440 × 900 frame. Panel, title and closing share the first
-   grid cell; the panel keeps the frame's 780px. */
+   grid cell. The panel is as tall as the form's (layout.css), which at
+   900px is the frame's 780px; the closing sits at its bottom. */
 
 @media (min-width: 1200px) {
   .done-view {
@@ -137,7 +135,8 @@
 
   .done__panel {
     grid-area: 1 / 1;
-    height: 780px;
+    align-self: stretch;
+    min-height: max(30rem, min(940px, 100svh - 2 * var(--edge)));
     padding: 54px 47px 0;
     overflow: hidden;
     border-radius: 48px;
@@ -148,12 +147,14 @@
     content: none;
   }
 
-  .done__light {
-    top: 258px;
-    left: 145px;
-    width: 523px;
-    height: 432px;
-    background-image: url('../assets/light/atmosphere-confirmation.svg');
+  /* The same light as the form's panel, with a softer bounce, as in the
+     file. Under the title and as far from the closing line as in the
+     frame; on shorter panels it stays under the title and loses some of
+     its lower part, as in the form's panel. */
+  .done__atmosphere {
+    --ambient: 0.755;
+    top: max(198px, 100% - 582px);
+    left: 85px;
   }
 
   .done__identity {
@@ -177,7 +178,8 @@
   .done__closing {
     position: relative;
     grid-area: 1 / 1;
-    margin: 702px 47px 0;
+    align-self: end;
+    margin: 0 47px 51px;
     padding: 0 0 3px;
     font-size: 16px;
     line-height: 24px;

@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { confirmation, contrast, fill, phone, rgb, submitButton, worstContrastUnderText } from './helpers.js';
+import { confirmation, contrast, fill, holdLight, phone, rgb, submitButton, worstContrastUnderText } from './helpers.js';
 
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 const audit = (page: Page) => new AxeBuilder({ page }).withTags(WCAG).analyze();
@@ -64,21 +64,78 @@ test.describe('contrast', () => {
     }
   });
 
-  test('text over the light masses stays above 4.5:1, at rest and at the end of the drift', async ({ page }, testInfo) => {
-    if (testInfo.project.name === 'desktop') await page.setViewportSize({ width: 1440, height: 1100 }); // whole panel in view
-    await page.goto('/');
+  // Each layer stopped at the same point of its own cycle: at rest, where
+  // each one is furthest from rest (35%, 50%, 70%) and where its second
+  // color is strongest (76%). The panel is checked at the frame's height
+  // and on a short window, where the epilogue sits over the light.
+  const phases = [0, 0.35, 0.5, 0.7, 0.76];
+  const large = 3;
+  const normal = 4.5;
+
+  async function expectReadableOverLight(page: Page, texts: [string, number][], label: string) {
     await page.evaluate(() => document.fonts.ready);
-    const texts =
-      testInfo.project.name === 'desktop'
-        ? ['.opening__rubric', '.opening__proposal', '.opening__context', '.opening__epilogue']
-        : ['.opening__name', '.opening__year', '.opening__proposal', '.opening__context'];
-    for (const time of [0, 14_000]) {
-      await page.evaluate((t) => document.getAnimations().forEach((a) => ((a.currentTime = t), a.pause())), time);
-      for (const selector of texts) {
+    for (const phase of phases) {
+      await holdLight(page, phase);
+      for (const [selector, minimum] of texts) {
         const worst = await worstContrastUnderText(page, page.locator(selector));
-        expect(worst, `${selector} at ${time}ms`).toBeGreaterThanOrEqual(4.5);
+        expect(worst, `${selector}, ${label}, at ${phase} of the cycle`).toBeGreaterThanOrEqual(minimum);
       }
     }
+  }
+
+  test('text over the light stays readable through its whole cycle', async ({ page }, testInfo) => {
+    if (testInfo.project.name === 'desktop') {
+      for (const height of [900, 720]) {
+        await page.setViewportSize({ width: 1440, height });
+        await page.goto('/');
+        const texts: [string, number][] = [
+          ['.opening__rubric', normal],
+          ['.opening__headline', large],
+          ['.opening__proposal', normal],
+          ['.opening__context', normal],
+          ['.opening__epilogue', normal],
+        ];
+        await expectReadableOverLight(page, texts, `1440 × ${height}`);
+      }
+    } else {
+      await page.goto('/');
+      const texts: [string, number][] = [
+        ['.opening__name', normal],
+        ['.opening__year', normal],
+        ['.opening__headline', large],
+        ['.opening__proposal', normal],
+        ['.opening__context', normal],
+      ];
+      await expectReadableOverLight(page, texts, 'phone');
+    }
+  });
+
+  test('the confirmation and the privacy notice too', async ({ page }, testInfo) => {
+    const desktop = testInfo.project.name === 'desktop';
+    if (desktop) await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto('/');
+    await fill(page, phone(testInfo));
+    await submitButton(page).click();
+    await expect(confirmation(page)).toBeVisible();
+    const done: [string, number][] = desktop
+      ? [
+          ['.done__identity', normal],
+          ['.done__title', large],
+          ['.done__closing', normal],
+        ]
+      : [
+          ['.done__identity', normal],
+          ['.done__meta', normal],
+          ['.done__title', large],
+        ];
+    await expectReadableOverLight(page, done, 'confirmation');
+
+    await page.goto('/privacidade');
+    const notice: [string, number][] = [
+      ['.notice__title', large],
+      ['.notice__lead', normal],
+    ];
+    await expectReadableOverLight(page, notice, 'privacy notice');
   });
 });
 

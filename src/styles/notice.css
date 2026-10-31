@@ -7,12 +7,9 @@
   padding: 30px 24px 0;
 }
 
-.notice__light {
-  top: -71px;
-  left: calc((min(100vw, 390px) - 390px) * 0.77);
-  width: 500px;
-  height: 532px;
-  background-image: url('../assets/light/opening-mobile.svg');
+.notice__glow {
+  top: -131px;
+  left: calc((min(100vw, 390px) - 390px) * 0.77 - 60px);
 }
 
 .notice__title {
@@ -63,8 +60,8 @@
   color: var(--acento);
 }
 
-/* Information the organizers still have to provide. The build refuses to
-   publish the page while any of these remain (vite.config.ts). */
+/* Information the organizers still have to provide, marked so it can't
+   pass for the real thing. */
 .pending {
   padding: 0 4px;
   outline: 1px dashed var(--erro-texto);
@@ -105,8 +102,8 @@
     padding: 60px 0 0;
   }
 
-  .notice__light {
-    left: 150px;
+  .notice__glow {
+    left: 90px;
   }
 
   .notice__title {

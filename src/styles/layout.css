@@ -19,11 +19,14 @@
   }
 }
 
+/* --edge is the space above and below the panels: 60px as in the frames,
+   less on short windows, down to 24px. */
 @media (min-width: 1200px) {
   .view {
     --page-margin: clamp(40px, 12.5vw - 110px, 70px);
+    --edge: clamp(24px, 12svh - 48px, 60px);
     max-width: 1440px;
-    padding: 60px var(--page-margin);
+    padding: var(--edge) var(--page-margin);
   }
 }
 
@@ -43,41 +46,6 @@
   }
 }
 
-/* Light masses ----------------------------------------------------------- */
-
-/* Each group is one SVG exported from the file, blur included. The static
-   composition is the design; motion only nudges the whole group a few
-   pixels and stops under prefers-reduced-motion. */
-.light {
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  --drift-x: -3px;
-  --drift-y: 2.5px;
-}
-
-@media (min-width: 1200px) {
-  .light {
-    --drift-x: -7px;
-    --drift-y: 5px;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .light {
-    animation: light-drift 14s ease-in-out infinite alternate;
-    will-change: transform;
-  }
-}
-
-@keyframes light-drift {
-  to {
-    transform: translate3d(var(--drift-x), var(--drift-y), 0);
-  }
-}
-
 /* Opening: the top of the page on compact, the sticky panel on wide ------ */
 
 .opening {
@@ -90,13 +58,11 @@
 }
 
 /* At 320 the 390 composition moves about 54px to the left: anchored in
-   between the two frames, it lands on both. */
-.opening__light {
-  top: -71px;
-  left: calc((min(100vw, 390px) - 390px) * 0.77);
-  width: 500px;
-  height: 532px;
-  background-image: url('../assets/light/opening-mobile.svg');
+   between the two frames, it lands on both. The layers carry 60px of
+   margin for the blur (light.css). */
+.opening__glow {
+  top: -131px;
+  left: calc((min(100vw, 390px) - 390px) * 0.77 - 60px);
 }
 
 .opening__meta {
@@ -148,30 +114,30 @@
     align-items: start;
   }
 
-  /* 940px tall, as in the frame. When the window is shorter than the panel
-     plus its margins, it sticks by its bottom edge instead of its top, so
-     the whole composition stays reachable. */
+  /* The frame's panel is 940px tall, 60px from the top of a window at
+     least 1060px tall. On shorter windows it takes the window's height minus
+     --edge above and below, and the headline and the space around the text
+     scale with that height (svh), from the frame's sizes at 900px down to a
+     floor at 640px. The proposal and the context keep their size and their
+     distance to the light. The panel never gets shorter than its content
+     (min-content), and it sticks only when it fits whole in the window
+     (panel.ts); otherwise it scrolls with the page. */
   .opening {
-    position: sticky;
-    top: min(60px, 100vh - 1000px);
-    height: 940px;
-    gap: 22px;
-    padding: 45px 43px;
+    --panel-gap: clamp(10px, 4.615svh - 19.538px, 22px);
+    height: min(940px, 100svh - 2 * var(--edge));
+    min-height: min-content;
+    gap: var(--panel-gap);
+    padding: clamp(28px, 6.538svh - 13.846px, 45px) 43px clamp(30px, 8.462svh - 24.154px, 52px);
     overflow: hidden;
+    overflow: clip;
     border-radius: 48px;
     background: var(--ameixa);
     color: var(--branco);
   }
 
-  /* 16px lower than in the frame: there the bright edge of the light sits
-     under "comentar" at 3:1; here the proposal stays above 4.5:1, even at
-     rest, and the composition is the same. */
-  .opening__light {
-    top: 490px;
-    left: 145px;
-    width: 523px;
-    height: 432px;
-    background-image: url('../assets/light/atmosphere-form.svg');
+  .opening[data-sticky] {
+    position: sticky;
+    top: var(--edge);
   }
 
   .opening__rubric {
@@ -184,15 +150,19 @@
   }
 
   .opening__headline {
-    padding-bottom: 20px;
-    font-size: 60px;
-    line-height: 63px;
+    padding-bottom: 0.333em;
+    font-size: clamp(42px, 6.923svh - 2.308px, 60px);
+    line-height: 1.05;
   }
 
   .opening__proposal {
     max-width: 469px;
     font-size: 18px;
     line-height: 27px;
+  }
+
+  .opening__proposal + .opening__context {
+    margin-top: calc(22px - var(--panel-gap));
   }
 
   .opening__context {
@@ -202,14 +172,31 @@
     color: var(--papel-quente);
   }
 
+  /* The space between the text and the epilogue, where the light falls. */
+  .opening__stage {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Placed from the text above it, 16px lower than in the frame: there the
+     bright edge of the light sits under "comentar" at 3:1; here the
+     proposal stays above 4.5:1. On shorter panels the light keeps that
+     place and loses some of its lower part, instead of moving under the
+     text. */
+  .opening__atmosphere {
+    top: calc(-215px - var(--panel-gap));
+    left: 42px;
+  }
+
+  /* White instead of the frame's papel-quente: on panels shorter than the
+     frame's, the epilogue sits over the warm bounce of the light, where
+     papel-quente stays around 4.2:1. */
   .opening__epilogue {
-    position: absolute;
-    top: 868px;
-    left: 43px;
-    width: 445px;
+    max-width: 445px;
     font-size: 13px;
     line-height: 20px;
-    color: var(--papel-quente);
+    color: var(--branco);
   }
 
   .form-column {

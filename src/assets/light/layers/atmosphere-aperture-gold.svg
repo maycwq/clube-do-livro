@@ -1,0 +1,9 @@
+<svg width="643" height="552" viewBox="-60 -60 643 552" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#f)"><rect x="295" y="31" width="140" height="300" transform="rotate(5 295 31)" fill="url(#g)"/></g>
+<defs>
+<filter id="f" x="177.853" y="-60" width="347.61400000000003" height="493.06" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feGaussianBlur stdDeviation="15.5"/>
+</filter>
+<linearGradient id="g" x1="295" y1="181" x2="435" y2="181" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#F7D9A0" stop-opacity="0.86"/><stop offset="0.52" stop-color="#E9A955" stop-opacity="0.57"/><stop offset="1" stop-color="#B5703F" stop-opacity="0"/></linearGradient>
+</defs>
+</svg>
