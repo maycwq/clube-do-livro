@@ -174,6 +174,15 @@ describe('handleSubmission', () => {
     expect(await rows()).toHaveLength(0);
   });
 
+  it('refuses what the page refuses, without dropping characters to make a number fit', async () => {
+    const response = await send(post(submission({ name: '5625746785', whatsapp: '31a98765-4321' })));
+    expect(response.status).toBe(422);
+    expect(await response.json()).toEqual({ error: 'invalid', fields: { name: 'invalid', whatsapp: 'characters' } });
+    const tooLong = await send(post(submission({ name: 'a'.repeat(81) })));
+    expect(await tooLong.json()).toEqual({ error: 'invalid', fields: { name: 'too_long' } });
+    expect(await rows()).toHaveLength(0);
+  });
+
   it('answers 400 to malformed requests', async () => {
     expect((await send(post('{"name": '))).status).toBe(400);
     expect((await send(post(submission({ consentVersion: 'v1' })))).status).toBe(400);

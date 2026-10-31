@@ -1,6 +1,8 @@
 import {
   FIELD_ORDER,
+  earlyFieldError,
   errorFields,
+  fieldError,
   formatWhatsapp,
   normalizeWhatsapp,
   validateSubmission,
@@ -27,8 +29,12 @@ export function setupInterestForm(document: Document): void {
   const failure = form.querySelector<HTMLElement>('.failure')!;
   const whatsapp = form.querySelector<HTMLInputElement>('#whatsapp')!;
 
-  let attempted = false;
   let inFlight = false;
+  // The error each field shows now, and the text fields the person has typed in.
+  const shown: Partial<Record<FieldName, FieldError>> = {};
+  const edited = new Set<FieldName>();
+  let announced: FieldName | undefined;
+  let announceTimer: ReturnType<typeof setTimeout> | undefined;
   // One id per set of answers: sending the same answers again (a retry after
   // an unclear failure) reuses it, so the server records them only once.
   let current: { answers: string; id: string } | null = null;
@@ -42,17 +48,16 @@ export function setupInterestForm(document: Document): void {
   form.addEventListener('submit', (event) => {
     event.preventDefault();
     if (inFlight) return;
-    attempted = true;
     clearFailure();
 
     const payload = readForm();
     const result = validateSubmission(payload);
-    if (!result.ok && Object.keys(result.errors).length > 0) {
-      showErrors(result.errors);
-      focusField(errorFields(result.errors)[0]!);
+    const errors = result.ok ? {} : result.errors;
+    showErrors(errors);
+    if (!result.ok && Object.keys(errors).length > 0) {
+      focusField(errorFields(errors)[0]!);
       return;
     }
-    showErrors({});
 
     if (Date.now() < waitUntil) {
       showFailure('tooMany');
@@ -61,13 +66,35 @@ export function setupInterestForm(document: Document): void {
     void send(payload);
   });
 
-  // Errors only appear on submit. After that, fixing a field clears its
-  // message while typing; a field is checked again (and its message updated)
-  // only when the person leaves it or sends again.
-  form.addEventListener('input', (event) => updateFieldFrom(event.target, false));
-  form.addEventListener('change', (event) => updateFieldFrom(event.target, true));
-  form.addEventListener('focusout', (event) => updateFieldFrom(event.target, true));
+  // Errors appear as soon as there is enough to tell (docs/product-decisions.md):
+  // while typing, only what typing more can't fix (earlyFieldError); when
+  // the person leaves a field they typed in, whatever is still wrong; on
+  // submit, everything. An error goes away as soon as the value no longer
+  // has it. While a field with an error is edited, its message stays as long
+  // as the same problem is there; anything else waits until the field is left.
+  form.addEventListener('input', (event) => {
+    const field = fieldOf(event.target);
+    if (!field) return;
+    const { value } = event.target as HTMLInputElement;
+    edited.add(field);
+    const error = fieldError(field, value);
+    const early = earlyFieldError(field, value);
+    if (!error) presentError(field, undefined);
+    else if (early) presentError(field, early);
+    else if (shown[field] !== error) presentError(field, undefined);
+  });
 
+  // Leaving a field the person didn't type in (or a choice) says nothing.
+  form.addEventListener('focusout', (event) => {
+    const field = fieldOf(event.target);
+    if (field !== 'name' && field !== 'whatsapp') return;
+    if (!edited.has(field) && !shown[field]) return;
+    presentError(field, fieldError(field, (event.target as HTMLInputElement).value));
+  });
+
+  // Written as in the placeholder once the person is done with it, never
+  // while typing, so the cursor and backspace behave as expected. A value
+  // that isn't a number is left exactly as typed.
   whatsapp.addEventListener('blur', () => {
     const normalized = normalizeWhatsapp(whatsapp.value);
     if (normalized) whatsapp.value = formatWhatsapp(normalized);
@@ -143,6 +170,8 @@ export function setupInterestForm(document: Document): void {
 
   function setSending(on: boolean) {
     inFlight = on;
+    clearTimeout(announceTimer);
+    announced = undefined;
     button.textContent = on ? button.dataset.sendingLabel! : button.dataset.label!;
     if (on) button.setAttribute('aria-disabled', 'true');
     else button.removeAttribute('aria-disabled');
@@ -178,23 +207,39 @@ export function setupInterestForm(document: Document): void {
     }
   }
 
-  function updateFieldFrom(target: EventTarget | null, mayMarkInvalid: boolean) {
-    if (!attempted || !(target instanceof HTMLInputElement)) return;
-    const field = FIELD_ORDER.find((name) => name === target.name);
-    if (!field) return;
-    const result = validateSubmission(readForm());
-    const error = result.ok ? undefined : result.errors[field];
-    if (!error || mayMarkInvalid) setFieldError(field, error);
+  function fieldOf(target: EventTarget | null): FieldName | undefined {
+    return target instanceof HTMLInputElement ? FIELD_ORDER.find((name) => name === target.name) : undefined;
   }
 
+  // On submit (or the server's answer) every field is updated at once and
+  // focus goes to the first problem, which is read with its message; nothing
+  // is announced on top of that.
   function showErrors(errors: FieldErrors) {
-    for (const field of FIELD_ORDER) setFieldError(field, errors[field]);
+    for (const field of FIELD_ORDER) presentError(field, errors[field], false);
+  }
+
+  function presentError(field: FieldName, error: FieldError | undefined, announce = true) {
+    if (shown[field] === error) return;
+    if (error) shown[field] = error;
+    else delete shown[field];
+    setFieldError(field, error);
+    if (error && announce) say(field, messageFor(field, error));
+    else if (!error && announced === field) say(undefined, '');
+  }
+
+  // A field's message changes while focus is on it or has just left it, so
+  // it's read out through the form's status, once per change, never per key.
+  function say(field: FieldName | undefined, text: string) {
+    clearTimeout(announceTimer);
+    announced = field;
+    status.textContent = '';
+    if (text) announceTimer = setTimeout(() => (status.textContent = text), 50);
   }
 
   function setFieldError(field: FieldName, error: FieldError | undefined) {
     const container = form.querySelector<HTMLElement>(`[data-field="${field}"]`)!;
     const message = document.getElementById(`${field}-error`)!;
-    message.textContent = error ? (fieldMessages[field][error] ?? fieldMessages[field].missing) : '';
+    message.textContent = error ? messageFor(field, error) : '';
     message.hidden = !error;
     container.toggleAttribute('data-invalid', Boolean(error));
 
@@ -217,11 +262,15 @@ export function setupInterestForm(document: Document): void {
   }
 }
 
+function messageFor(field: FieldName, error: FieldError): string {
+  return fieldMessages[field][error] ?? fieldMessages[field].missing;
+}
+
 function knownErrors(fields: Record<string, unknown>): FieldErrors {
   const errors: FieldErrors = {};
   for (const field of FIELD_ORDER) {
     const error = fields[field];
-    if (error === 'missing' || error === 'invalid' || error === 'too_long') errors[field] = error;
+    if (error === 'missing' || error === 'invalid' || error === 'too_long' || error === 'characters') errors[field] = error;
   }
   return errors;
 }

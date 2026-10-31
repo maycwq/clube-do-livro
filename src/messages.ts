@@ -7,12 +7,13 @@ export const fieldMessages: Record<FieldName, Partial<Record<FieldError, string>
   format: { missing: 'escolha uma das opções.' },
   name: {
     missing: 'informe como a gente pode te chamar.',
-    // The field stops at 80 characters, so this only shows if that limit is bypassed.
+    invalid: 'confira o nome ou apelido que você informou.',
     too_long: 'use até 80 caracteres no nome ou apelido.',
   },
   whatsapp: {
     missing: 'informe seu WhatsApp com DDD.',
     invalid: 'confira o DDD e o número do WhatsApp.',
+    characters: 'use apenas números e sinais de telefone, sem letras ou outros símbolos.',
   },
 };
 

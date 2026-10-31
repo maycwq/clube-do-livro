@@ -9,6 +9,10 @@ test.describe('axe (WCAG 2.2 A and AA)', () => {
   test('the form, with and without errors', async ({ page }) => {
     await page.goto('/');
     expect((await audit(page)).violations).toEqual([]);
+    // An error that shows while typing, with focus still in the field.
+    await page.getByLabel('seu WhatsApp').pressSequentially('31 9876a');
+    await expect(page.locator('#whatsapp-error')).toBeVisible();
+    expect((await audit(page)).violations).toEqual([]);
     await submitButton(page).click();
     expect((await audit(page)).violations).toEqual([]);
   });

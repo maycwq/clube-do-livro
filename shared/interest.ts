@@ -33,8 +33,12 @@ export type FieldName = 'interest' | 'format' | 'name' | 'whatsapp';
 // Order of the fields on the page, used to focus the first one with an error.
 export const FIELD_ORDER: readonly FieldName[] = ['interest', 'format', 'name', 'whatsapp'];
 
-/** missing: nothing there; invalid: something there that can't be used; too_long: over the limit. */
-export type FieldError = 'missing' | 'invalid' | 'too_long';
+/**
+ * missing: nothing there; invalid: something there that can't be used;
+ * too_long: over the limit; characters: a WhatsApp with letters or symbols
+ * that don't belong in a phone number.
+ */
+export type FieldError = 'missing' | 'invalid' | 'too_long' | 'characters';
 export type FieldErrors = Partial<Record<FieldName, FieldError>>;
 
 // An invalid result with no field errors is a malformed request (unknown
@@ -67,33 +71,96 @@ export function normalizeName(raw: unknown): string {
 }
 
 /**
+ * A name or nickname, as people want to be called: any alphabet, accents,
+ * hyphens, apostrophes, digits and symbols. Only two things are refused as
+ * clearly not a name: nothing but symbols ("...", "?"), and a long number
+ * with no letters (6 digits or more), which is usually a phone number or a
+ * document typed in the wrong field. Short numbers ("007") are fine.
+ */
+function nameError(raw: unknown): FieldError | undefined {
+  const name = normalizeName(raw);
+  if (!/[^\p{Z}\p{Cf}]/u.test(name)) return 'missing';
+  if ([...name].length > NAME_MAX_LENGTH) return 'too_long';
+  if (!/\p{L}/u.test(name)) {
+    const digits = name.match(/\p{Nd}/gu)?.length ?? 0;
+    if (digits === 0 || digits >= 6) return 'invalid';
+  }
+  return undefined;
+}
+
+// What a phone number can be written with: digits, spaces, parentheses,
+// dots, hyphens and dashes, and a + at the start ("+55" or "(+55)").
+const PHONE_CHARACTERS = /^[\s(]*\+?[\d\s().\-\u2010-\u2015\u2212]*$/;
+const INTERNATIONAL = /^[\s(]*\+/;
+// Area code and number, without the country code or the trunk 0.
+const NATIONAL_DIGITS = 11;
+
+/**
+ * The ways the digits can be read as area code + number: as typed, after
+ * the country code 55 and after the trunk 0. With a + the country code is
+ * required.
+ */
+function nationalReadings(raw: string): string[] {
+  const digits = raw.replace(/\D/g, '');
+  const international = INTERNATIONAL.test(raw);
+  const readings = international ? [] : [digits];
+  if (digits.startsWith('55')) readings.push(digits.slice(2));
+  for (const reading of [...readings]) if (reading.startsWith('0')) readings.push(reading.slice(1));
+  return readings;
+}
+
+/**
  * Turns what people type into an E.164 Brazilian number, or null when it
- * isn't one. Accepts any punctuation, an optional +55 / 55 prefix and the
- * trunk 0 before the area code. Mobile numbers have 9 digits starting with 9;
- * landlines (WhatsApp Business) have 8 digits starting with 2 to 5.
+ * isn't one. Accepts the characters of a phone number (never letters or
+ * other symbols), an optional +55 / 55 prefix and the trunk 0 before the
+ * area code. Mobile numbers have 9 digits starting with 9; landlines
+ * (WhatsApp Business) have 8 digits starting with 2 to 5.
  */
 export function normalizeWhatsapp(raw: unknown): string | null {
-  if (typeof raw !== 'string' || raw.length > 40) return null;
-  let digits = raw.replace(/\D/g, '');
-
-  if (raw.trim().startsWith('+')) {
-    if (!digits.startsWith('55')) return null;
-    digits = digits.slice(2);
-  } else if ((digits.length === 12 || digits.length === 13) && digits.startsWith('55')) {
-    digits = digits.slice(2);
+  if (typeof raw !== 'string' || raw.length > 40 || !PHONE_CHARACTERS.test(raw)) return null;
+  for (const digits of nationalReadings(raw)) {
+    const areaCode = digits.slice(0, 2);
+    const number = digits.slice(2);
+    const isMobile = number.length === 9 && number.startsWith('9');
+    const isLandline = number.length === 8 && /^[2-5]/.test(number);
+    if (AREA_CODES.has(areaCode) && (isMobile || isLandline)) return `+55${areaCode}${number}`;
   }
-  if ((digits.length === 11 || digits.length === 12) && digits.startsWith('0')) {
-    digits = digits.slice(1);
+  return null;
+}
+
+function whatsappError(raw: unknown): FieldError | undefined {
+  if (typeof raw !== 'string' || raw.trim() === '') return 'missing';
+  if (!PHONE_CHARACTERS.test(raw)) return 'characters';
+  return normalizeWhatsapp(raw) ? undefined : 'invalid';
+}
+
+/** What's wrong with one field's value, or undefined when it can be used. */
+export function fieldError(field: FieldName, value: unknown): FieldError | undefined {
+  switch (field) {
+    case 'interest':
+      return INTEREST_OPTIONS.some((option) => option === value) ? undefined : value == null || value === '' ? 'missing' : 'invalid';
+    case 'format':
+      return FORMAT_OPTIONS.some((option) => option === value) ? undefined : value == null || value === '' ? 'missing' : 'invalid';
+    case 'name':
+      return nameError(value);
+    case 'whatsapp':
+      return whatsappError(value);
   }
+}
 
-  const areaCode = digits.slice(0, 2);
-  const number = digits.slice(2);
-  if (!AREA_CODES.has(areaCode)) return null;
-  const isMobile = number.length === 9 && number.startsWith('9');
-  const isLandline = number.length === 8 && /^[2-5]/.test(number);
-  if (!isMobile && !isLandline) return null;
-
-  return `+55${areaCode}${number}`;
+/**
+ * The part of fieldError that is already certain while the value is being
+ * typed, because typing more can't fix it: a name over the limit, and a
+ * WhatsApp with characters that don't belong or more digits than any
+ * Brazilian number has. An empty or incomplete value is never an error here.
+ */
+export function earlyFieldError(field: FieldName, value: unknown): FieldError | undefined {
+  if (typeof value !== 'string') return undefined;
+  if (field === 'name') return [...normalizeName(value)].length > NAME_MAX_LENGTH ? 'too_long' : undefined;
+  if (field !== 'whatsapp') return undefined;
+  if (!PHONE_CHARACTERS.test(value)) return 'characters';
+  const readings = nationalReadings(value);
+  return readings.length > 0 && readings.every((digits) => digits.length > NATIONAL_DIGITS) ? 'invalid' : undefined;
 }
 
 /** "+5531999999999" → "(31) 99999-9999" */
@@ -108,21 +175,10 @@ export function validateSubmission(input: unknown): ValidationResult {
   const data = (typeof input === 'object' && input !== null ? input : {}) as Record<string, unknown>;
   const errors: FieldErrors = {};
 
-  const interest = INTEREST_OPTIONS.find((option) => option === data.interest);
-  if (!interest) errors.interest = data.interest == null || data.interest === '' ? 'missing' : 'invalid';
-
-  const format = FORMAT_OPTIONS.find((option) => option === data.format);
-  if (!format) errors.format = data.format == null || data.format === '' ? 'missing' : 'invalid';
-
-  const name = normalizeName(data.name);
-  if (name.length === 0) errors.name = 'missing';
-  else if ([...name].length > NAME_MAX_LENGTH) errors.name = 'too_long';
-
-  const whatsapp = normalizeWhatsapp(data.whatsapp);
-  if (!whatsapp) {
-    errors.whatsapp = typeof data.whatsapp !== 'string' || data.whatsapp.trim() === '' ? 'missing' : 'invalid';
+  for (const field of FIELD_ORDER) {
+    const error = fieldError(field, data[field]);
+    if (error) errors[field] = error;
   }
-
   if (Object.keys(errors).length > 0) return { ok: false, errors };
 
   const consentVersion = CONSENT_VERSIONS.find((version) => version === data.consentVersion);
@@ -134,10 +190,10 @@ export function validateSubmission(input: unknown): ValidationResult {
     ok: true,
     value: {
       submissionId: submissionId.toLowerCase(),
-      name,
-      whatsapp: whatsapp!,
-      interest: interest!,
-      format: format!,
+      name: normalizeName(data.name),
+      whatsapp: normalizeWhatsapp(data.whatsapp)!,
+      interest: data.interest as Interest,
+      format: data.format as Format,
       testInvite,
       consentVersion,
     },
