@@ -7,18 +7,19 @@
    - fields: large, soft radial gradients in the solar family, bigger than
      the surface and partly outside it, for depth: a warm near-black, a
      dominant warm color and a second one close to it;
-   - the window light from the Figma file, one blurred SVG per shape
-     (assets/light/layers): the source behind the opening, the edge that
-     hides it and its reflection.
+   - a light: on the form's desktop panel, a golden hour sun with its rays;
+     elsewhere the window light from the Figma file, one blurred SVG per
+     shape (assets/light/layers): the source behind the opening, the edge
+     that hides it and its reflection.
 
    At rest the layers are the composition, which is what
    prefers-reduced-motion shows. In motion every layer drifts on its own:
    position on each axis, size, turn and intensity each have their own
-   cycle, between 11 and 37 seconds, so the light changes place and
+   cycle, between 11 and 67 seconds, so the light changes place and
    temperature without ever visibly coming back to where it started.
 
-   The window light only moves away from the text and only gets dimmer
-   than at rest. The warm fields sit below and to the right of the text,
+   The light only moves away from the text, or fades before reaching it,
+   and the window light only gets dimmer than at rest. The warm fields sit below and to the right of the text,
    grow away from it and never drift up toward it; the near-black one only
    darkens what's behind the text. The tests check every text over the
    light at rest and across the cycle. Only transform properties and
@@ -82,7 +83,7 @@
   }
 
   /* Out of view (light.ts): nothing to draw, nothing to run. */
-  .light[data-paused] > span {
+  .light[data-paused] span {
     animation-play-state: paused;
   }
 }
@@ -132,7 +133,10 @@
   }
 }
 
-/* Fields of the desktop panels -------------------------------------------- */
+/* Fields of the desktop panels --------------------------------------------
+
+   Both panels have the near-black. The warm ones are the confirmation's;
+   the form's panel takes its warmth from the sun (below) and its bounce. */
 
 .fields {
   inset: 0;
@@ -229,6 +233,32 @@
   --origin: 0% 0%;
 }
 
+/* On the form's panel, the sun's light bounced back from below and the
+   right, warm and low, so the lower part of the panel isn't left out of
+   the hour. It only drifts down and right, away from the epilogue. */
+.field--bounce {
+  --c: 214 110 60;
+  --a: 0.32;
+  --left: 40%;
+  --top: 66%;
+  --w: 110%;
+  --h: 64%;
+  --x1: 6%;
+  --tx: 43s;
+  --dx: -17s;
+  --y1: 6%;
+  --ty: 59s;
+  --dy: -29s;
+  --s0: 0.96;
+  --s1: 1.06;
+  --ts: 47s;
+  --o0: 0.7;
+  --o1: 1;
+  --to: 31s;
+  --do: -8s;
+  --origin: 100% 100%;
+}
+
 /* The confirmation's panel has its own temperature: near-black and amber,
    with a deep peach. */
 .done__fields .field--deep {
@@ -266,8 +296,226 @@
   --dy: -10s;
 }
 
+/* golden hour: the sun of the form's desktop panel -------------------------
+
+   A low sun at the top right, partly past the panel's edge: a white-gold
+   core, a halo, rays all around it and a copper wash that warms the panel
+   toward it. The rays are two conic gradients, one of fine rays and one of
+   wide soft ones, irregular in spacing, width and strength: strongest
+   where they point down the free side of the panel (140 to 225deg, 0 being
+   up), weaker toward the headline, and faded with the distance to the core
+   by a radial mask, so they're gone before the proposal.
+
+   The sun moves as one body, sinking a little and coming back over a
+   minute; around its center the two sets of rays turn slowly in opposite
+   directions, so their crossings keep changing like light through haze,
+   while the halo and the core breathe on their own short cycles. */
+
+.sun {
+  --sun-x: calc(100% - 150px);
+  --sun-y: -6px;
+  --ray: 255 206 128;
+  --x1: -10px;
+  --tx: 53s;
+  --dx: -19s;
+  --y1: 14px;
+  --ty: 67s;
+  --dy: -31s;
+}
+
+/* Every part is a square centered on the sun, so it turns and grows
+   around it. */
+.sun > span {
+  position: absolute;
+  left: calc(var(--sun-x) - var(--r));
+  top: calc(var(--sun-y) - var(--r));
+  width: calc(2 * var(--r));
+  height: calc(2 * var(--r));
+  scale: var(--s0, 1);
+  rotate: var(--r0, 0deg);
+  opacity: var(--o0, 1);
+}
+
+/* Copper over the plum, wide enough to warm the whole upper right. */
+.sun__wash {
+  --r: 720px;
+  --s0: 0.96;
+  --s1: 1.05;
+  --ts: 41s;
+  --o0: 0.82;
+  --o1: 1;
+  --to: 37s;
+  --do: -9s;
+  background: radial-gradient(
+    closest-side,
+    rgb(232 122 40 / 0.72) 0%,
+    rgb(214 100 40 / 0.58) 22%,
+    rgb(180 76 46 / 0.34) 46%,
+    rgb(146 60 58 / 0.13) 72%,
+    rgb(140 60 60 / 0) 100%
+  );
+}
+
+.sun__halo {
+  --r: 280px;
+  --s0: 0.94;
+  --s1: 1.07;
+  --ts: 29s;
+  --ds: -7s;
+  --o0: 0.8;
+  --o1: 1;
+  --to: 19s;
+  --do: -12s;
+  background: radial-gradient(
+    closest-side,
+    rgb(255 216 124 / 0.85) 0%,
+    rgb(250 164 64 / 0.55) 26%,
+    rgb(232 112 42 / 0.24) 58%,
+    rgb(232 112 42 / 0) 100%
+  );
+}
+
+.sun__rays {
+  --r: 560px;
+  --r0: -3deg;
+  --r1: 3.5deg;
+  --tr: 47s;
+  --dr: -11s;
+  --s0: 0.98;
+  --s1: 1.05;
+  --ts: 31s;
+  --ds: -20s;
+  --o0: 0.6;
+  --o1: 1;
+  --to: 17s;
+  --do: -5s;
+  background: conic-gradient(
+    transparent 2.7deg, rgb(var(--ray) / 0.17) 3.8deg, transparent 4.9deg,
+    transparent 10.0deg, rgb(var(--ray) / 0.13) 11.8deg, transparent 13.6deg,
+    transparent 19.0deg, rgb(var(--ray) / 0.08) 20.7deg, transparent 22.5deg,
+    transparent 30.2deg, rgb(var(--ray) / 0.09) 31.2deg, transparent 32.2deg,
+    transparent 38.0deg, rgb(var(--ray) / 0.09) 40.2deg, transparent 42.4deg,
+    transparent 46.5deg, rgb(var(--ray) / 0.22) 48.4deg, transparent 50.3deg,
+    transparent 57.3deg, rgb(var(--ray) / 0.22) 58.8deg, transparent 60.3deg,
+    transparent 63.4deg, rgb(var(--ray) / 0.12) 65.7deg, transparent 68.0deg,
+    transparent 74.0deg, rgb(var(--ray) / 0.12) 75.1deg, transparent 76.2deg,
+    transparent 85.6deg, rgb(var(--ray) / 0.16) 86.8deg, transparent 87.9deg,
+    transparent 93.6deg, rgb(var(--ray) / 0.29) 95.1deg, transparent 96.5deg,
+    transparent 100.8deg, rgb(var(--ray) / 0.20) 101.8deg, transparent 102.8deg,
+    transparent 111.6deg, rgb(var(--ray) / 0.23) 113.2deg, transparent 114.8deg,
+    transparent 120.2deg, rgb(var(--ray) / 0.22) 121.8deg, transparent 123.5deg,
+    transparent 129.6deg, rgb(var(--ray) / 0.21) 131.7deg, transparent 133.7deg,
+    transparent 138.1deg, rgb(var(--ray) / 0.39) 139.8deg, transparent 141.5deg,
+    transparent 148.0deg, rgb(var(--ray) / 0.49) 149.4deg, transparent 150.8deg,
+    transparent 154.4deg, rgb(var(--ray) / 0.42) 156.0deg, transparent 157.6deg,
+    transparent 163.4deg, rgb(var(--ray) / 0.17) 165.1deg, transparent 166.8deg,
+    transparent 174.0deg, rgb(var(--ray) / 0.35) 176.2deg, transparent 178.3deg,
+    transparent 184.6deg, rgb(var(--ray) / 0.40) 186.0deg, transparent 187.4deg,
+    transparent 192.0deg, rgb(var(--ray) / 0.32) 193.9deg, transparent 195.7deg,
+    transparent 201.4deg, rgb(var(--ray) / 0.32) 203.8deg, transparent 206.3deg,
+    transparent 211.2deg, rgb(var(--ray) / 0.40) 212.2deg, transparent 213.1deg,
+    transparent 218.6deg, rgb(var(--ray) / 0.44) 221.1deg, transparent 223.6deg,
+    transparent 227.1deg, rgb(var(--ray) / 0.37) 228.6deg, transparent 230.2deg,
+    transparent 235.0deg, rgb(var(--ray) / 0.18) 236.6deg, transparent 238.2deg,
+    transparent 245.0deg, rgb(var(--ray) / 0.30) 246.0deg, transparent 247.0deg,
+    transparent 253.7deg, rgb(var(--ray) / 0.18) 255.0deg, transparent 256.3deg,
+    transparent 265.9deg, rgb(var(--ray) / 0.14) 267.0deg, transparent 268.0deg,
+    transparent 272.4deg, rgb(var(--ray) / 0.18) 274.7deg, transparent 277.0deg,
+    transparent 283.6deg, rgb(var(--ray) / 0.12) 284.9deg, transparent 286.3deg,
+    transparent 289.6deg, rgb(var(--ray) / 0.19) 291.9deg, transparent 294.3deg,
+    transparent 298.9deg, rgb(var(--ray) / 0.11) 300.1deg, transparent 301.3deg,
+    transparent 307.8deg, rgb(var(--ray) / 0.16) 309.4deg, transparent 311.1deg,
+    transparent 317.7deg, rgb(var(--ray) / 0.14) 318.6deg, transparent 319.5deg,
+    transparent 326.2deg, rgb(var(--ray) / 0.22) 328.0deg, transparent 329.8deg,
+    transparent 336.5deg, rgb(var(--ray) / 0.17) 338.3deg, transparent 340.0deg,
+    transparent 346.2deg, rgb(var(--ray) / 0.21) 347.2deg, transparent 348.2deg,
+    transparent 354.3deg, rgb(var(--ray) / 0.19) 356.6deg, transparent 358.9deg
+  );
+  -webkit-mask-image: var(--ray-fade);
+  mask-image: var(--ray-fade);
+}
+
+.sun__rays--soft {
+  --r: 620px;
+  --r0: 4deg;
+  --r1: -3deg;
+  --tr: 61s;
+  --dr: -23s;
+  --s0: 1.04;
+  --s1: 0.97;
+  --ts: 37s;
+  --ds: -3s;
+  --o0: 0.45;
+  --o1: 0.95;
+  --to: 23s;
+  --do: -14s;
+  background: conic-gradient(
+    transparent 3.1deg, rgb(var(--ray) / 0.08) 8.9deg, transparent 14.6deg,
+    transparent 20.2deg, rgb(var(--ray) / 0.12) 24.6deg, transparent 29.0deg,
+    transparent 36.6deg, rgb(var(--ray) / 0.06) 40.1deg, transparent 43.6deg,
+    transparent 52.2deg, rgb(var(--ray) / 0.06) 56.3deg, transparent 60.5deg,
+    transparent 68.0deg, rgb(var(--ray) / 0.07) 72.1deg, transparent 76.2deg,
+    transparent 86.6deg, rgb(var(--ray) / 0.09) 90.3deg, transparent 94.0deg,
+    transparent 100.3deg, rgb(var(--ray) / 0.14) 105.2deg, transparent 110.1deg,
+    transparent 117.8deg, rgb(var(--ray) / 0.14) 123.6deg, transparent 129.5deg,
+    transparent 132.0deg, rgb(var(--ray) / 0.19) 137.5deg, transparent 143.1deg,
+    transparent 149.7deg, rgb(var(--ray) / 0.15) 155.0deg, transparent 160.4deg,
+    transparent 167.5deg, rgb(var(--ray) / 0.23) 173.4deg, transparent 179.4deg,
+    transparent 186.1deg, rgb(var(--ray) / 0.19) 190.0deg, transparent 193.8deg,
+    transparent 199.6deg, rgb(var(--ray) / 0.16) 205.5deg, transparent 211.3deg,
+    transparent 214.3deg, rgb(var(--ray) / 0.12) 219.5deg, transparent 224.7deg,
+    transparent 235.1deg, rgb(var(--ray) / 0.14) 238.1deg, transparent 241.1deg,
+    transparent 250.1deg, rgb(var(--ray) / 0.11) 253.6deg, transparent 257.0deg,
+    transparent 265.7deg, rgb(var(--ray) / 0.10) 270.0deg, transparent 274.3deg,
+    transparent 281.7deg, rgb(var(--ray) / 0.06) 287.8deg, transparent 293.9deg,
+    transparent 296.5deg, rgb(var(--ray) / 0.05) 300.9deg, transparent 305.2deg,
+    transparent 316.0deg, rgb(var(--ray) / 0.05) 319.9deg, transparent 323.8deg,
+    transparent 330.2deg, rgb(var(--ray) / 0.10) 334.6deg, transparent 339.0deg,
+    transparent 347.6deg, rgb(var(--ray) / 0.09) 351.7deg, transparent 355.7deg
+  );
+}
+
+.sun__rays,
+.sun__rays--soft {
+  --ray-fade: radial-gradient(closest-side, #000 4%, rgb(0 0 0 / 0.6) 22%, rgb(0 0 0 / 0.22) 50%, rgb(0 0 0 / 0.06) 75%, transparent 100%);
+}
+
+.sun__core {
+  --r: 92px;
+  --s0: 0.97;
+  --s1: 1.03;
+  --ts: 13s;
+  --o0: 0.9;
+  --o1: 1;
+  --to: 11s;
+  --do: -4s;
+  background: radial-gradient(
+    closest-side,
+    rgb(255 252 238) 0%,
+    rgb(255 240 190) 26%,
+    rgb(255 206 102 / 0.85) 50%,
+    rgb(248 152 52 / 0.35) 76%,
+    rgb(248 152 52 / 0) 100%
+  );
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sun > span {
+    animation:
+      drift-scale var(--ts) var(--ease-drift) var(--ds, 0s) infinite alternate,
+      drift-glow var(--to) var(--ease-drift) var(--do, 0s) infinite alternate;
+  }
+
+  .sun > .sun__rays {
+    animation:
+      drift-turn var(--tr) var(--ease-drift) var(--dr, 0s) infinite alternate,
+      drift-scale var(--ts) var(--ease-drift) var(--ds, 0s) infinite alternate,
+      drift-glow var(--to) var(--ease-drift) var(--do, 0s) infinite alternate;
+  }
+}
+
 /* atmosfera editorial / fonte oculta + reflexo: the window light of the
-   desktop panels. The group is 523 × 432 in the file; layers add 60px
+   confirmation's desktop panel. The group is 523 × 432 in the file; layers add 60px
    around it for the blur. */
 
 .atmosphere {

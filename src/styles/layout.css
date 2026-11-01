@@ -216,22 +216,11 @@
     color: var(--papel-quente);
   }
 
-  /* The space between the text and the epilogue, where the light falls. */
+  /* The space between the text and the epilogue, which keeps the epilogue
+     at the bottom of the panel. */
   .opening__stage {
-    position: relative;
     flex: 1;
     min-height: 0;
-  }
-
-  /* Placed from the text above it, 16px lower than in the frame: there the
-     bright edge of the light sits under "comentar" at 3:1; here the
-     proposal stays above 4.5:1. On shorter panels the light keeps that
-     place and loses some of its lower part, instead of moving under the
-     text. Horizontally it keeps the frame's distance to the panel's right
-     edge, which cuts it, whatever the panel's width. */
-  .opening__atmosphere {
-    top: calc(-215px - var(--panel-gap));
-    left: calc(100% - 432px);
   }
 
   /* White instead of the frame's papel-quente: on panels shorter than the

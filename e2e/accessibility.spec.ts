@@ -76,8 +76,9 @@ test.describe('contrast', () => {
   });
 
   // Every light animation stopped at the same point of its own cycle, from
-  // rest to the other end. The panel is checked at the frame's height and
-  // on a short window, where the epilogue sits over the light.
+  // rest to the other end. The panel is checked at the frame's height, on a
+  // short window, where the epilogue sits over the light, and on the
+  // narrowest panel, where the sun is closest to the text.
   const phases = [0, 0.25, 0.5, 0.75, 1];
   const large = 3;
   const normal = 4.5;
@@ -96,8 +97,10 @@ test.describe('contrast', () => {
   test('text over the light stays readable through its whole cycle', async ({ page }, testInfo) => {
     test.slow(); // about 50 screenshots
     if (testInfo.project.name === 'desktop') {
-      for (const height of [900, 720]) {
-        await page.setViewportSize({ width: 1440, height });
+      // The sun sits at a fixed distance from the panel's right edge, so it
+      // comes closest to the text on the narrowest, shortest panel.
+      for (const [width, height] of [[1440, 900], [1440, 720], [1240, 600]] as const) {
+        await page.setViewportSize({ width, height });
         await page.goto('/');
         const texts: [string, number][] = [
           ['.opening__rubric', normal],
@@ -106,7 +109,7 @@ test.describe('contrast', () => {
           ['.opening__context', normal],
           ['.opening__epilogue', normal],
         ];
-        await expectReadableOverLight(page, texts, `1440 × ${height}`);
+        await expectReadableOverLight(page, texts, `${width} × ${height}`);
       }
     } else {
       await page.goto('/');

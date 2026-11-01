@@ -49,10 +49,6 @@
     animation: light-in 1600ms ease-out 120ms backwards;
   }
 
-  .opening__stage .light {
-    animation: light-in 1600ms ease-out 260ms backwards;
-  }
-
   .opening > :not(.light, .opening__stage) {
     animation: reveal var(--reveal) var(--ease-settle) backwards;
     animation-delay: calc(160ms + var(--order, 0) * 50ms);
