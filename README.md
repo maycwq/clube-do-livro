@@ -121,6 +121,7 @@ src/
     light/atmosphere-form.svg  the desktop group whole, for the link preview image
     icons/                 radio and the PikaIcons check, exported from the Figma file
 public/og.jpg              link preview image
+public/favicon.*, apple-touch-icon.png  the olue favicon: favicon.svg as on olue.com.br, the .ico (16, 32) and the 180px png rendered from it
 shared/interest.ts         fields, options, normalization and validation (page and API)
 server/
   handler.ts               the API: checks, rate limit, validation, storage, failures
