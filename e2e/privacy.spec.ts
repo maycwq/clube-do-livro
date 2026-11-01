@@ -92,10 +92,35 @@ test('a link to /privacidade opens the form with it open; closing leaves the for
   await expect(link(page)).toBeFocused();
 });
 
-test('information still missing is marked as pending, never shown as real', async ({ page }) => {
+test('who organizes, and the Instagram to ask about the data, in a new tab so the form stays', async ({ page, context }) => {
   await page.goto('/privacidade');
-  const pending = drawer(page).locator('[data-pending]');
-  await expect(pending).toHaveText(['[IDENTIFICAÇÃO DOS RESPONSÁVEIS]', '[CANAL DE CONTATO PARA PRIVACIDADE]']);
+  await expect(drawer(page).getByText('o clube é organizado por maycon e luy.')).toBeVisible();
+
+  const instagram = drawer(page).getByRole('link', { name: /^Instagram/ });
+  await expect(instagram).toHaveAccessibleName('Instagram (abre em outra aba)');
+  await expect(instagram).toHaveText('Instagram');
+  await expect(instagram).toHaveAttribute('href', 'https://www.instagram.com/comolue/');
+  await expect(instagram).toHaveAttribute('target', '_blank');
+  await expect(instagram).toHaveAttribute('rel', 'noopener');
+  await expect(instagram.locator('xpath=..')).toContainText('pra tirar dúvidas sobre seus dados, pedir pra corrigir ou apagar suas respostas ou deixar de receber mensagens');
+
+  // Reached from the keyboard inside the drawer, and underlined like the
+  // form's links.
+  await instagram.focus();
+  await expect(instagram).toBeFocused();
+  expect(await instagram.evaluate((element) => getComputedStyle(element).textDecorationLine)).toBe('underline');
+
+  // Opening it leaves the drawer and the form where they were. The new tab
+  // is stopped before it leaves this machine.
+  await context.route('https://www.instagram.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/html', body: '<title>instagram</title>' }));
+  const [opened] = await Promise.all([context.waitForEvent('page'), instagram.click()]);
+  await opened.waitForLoadState();
+  expect(opened.url()).toBe('https://www.instagram.com/comolue/');
+  expect(await opened.evaluate(() => window.opener)).toBeNull();
+  await opened.close();
+  await expect(drawer(page)).toBeVisible();
+  await expect(page).toHaveURL(/\/privacidade$/);
+  await expect(drawer(page).locator('[data-pending], mark')).toHaveCount(0);
 });
 
 test('the drawer: the paper of the page, rounded on its left, wide enough to read, the whole screen on phones', async ({ page, isMobile }) => {

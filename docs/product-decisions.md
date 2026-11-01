@@ -75,7 +75,7 @@ Where the file falls short of WCAG 2.2 AA, the implementation moves as little as
 - **The consent record is the exact text shown**: the sentence next to the button, the privacy line, the test invite and the whole privacy notice, stored once per version in `consent_texts`; each response and change request points to its version. `v1` (the first wording) was never published; `v2` adds the notice. A version can be corrected while nothing points to it; after that, a change means a new version.
 - **The privacy notice is short and plain.** Five parts: who organizes, why the form asks for a name and a WhatsApp, how the test invite works, how long answers are kept and how to stop, correct or delete. It covers what is true for this form, without legal boilerplate.
 - **Retention follows the club, not a legal deadline**: answers are kept only while the club is being organized for 2027; when people are contacted, whoever doesn't want to go on leaves the list; if the club doesn't happen in 2027, everything is deleted. This is the proposal written in the notice, for the organizers to confirm or adjust.
-- **Missing information shows as pending and doesn't stop the build.** Who organizes and the contact channel are marked as visibly pending, never as information. The site can be deployed and reviewed like that; collecting answers waits for both, by connecting the database only after they're filled in.
+- **Who organizes and where to ask are named in the notice.** The club is organized by maycon e luy. Questions about the data and requests to correct, delete or stop messages go to olue's Instagram, which works before the club has messaged anyone, or in reply to the club's WhatsApp message; either way the number is confirmed as the person's before anything changes. The link opens in a new tab, so the form and the drawer stay as they were.
 - **Rate limiting keeps a keyed hash of the IP for at most an hour**, in a separate table never joined with the responses.
 - **The responses are read in Neon's console.** No admin page: the list is small, Neon's table view and SQL editor cover reading, exporting, applying changes and deleting, and there's nothing new to secure.
 - **Requests are confirmed through the number itself** before acting, and stopping contact means deleting the row (its change requests go with it). Dropping only the test invite is an update of that column. The README covers exports, Neon's restore window and branches.
@@ -87,10 +87,9 @@ Where the file falls short of WCAG 2.2 AA, the implementation moves as little as
 
 ### deploy
 
-- **Deployed on Vercel from `main`.** The project is the organizers'; `vercel.json` fixes how it's built, so the project settings can't change it. No database was connected by this work: that step turns collection on and waits for the notice (README).
+- **Deployed on Vercel from `main`.** The project is the organizers'; `vercel.json` fixes how it's built, so the project settings can't change it. No database was connected by this work: that step turns collection on (README).
 - **Link previews use the production domain**, from `VERCEL_PROJECT_PRODUCTION_URL` or `SITE_URL`, even on preview deployments.
 
 ## still open
 
-- **Who organizes the club and the contact channel for privacy requests**, the two pending items of the notice. Answers wait for both.
 - **The retention criterion in the notice** is a proposal; the organizers confirm it or change the wording.

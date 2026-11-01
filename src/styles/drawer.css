@@ -166,14 +166,18 @@ html[data-drawer] {
   margin-top: 12px;
 }
 
-/* Information the organizers still have to provide, marked so it can't
-   pass for the real thing. */
-.pending {
-  padding: 0 4px;
-  outline: 1px dashed var(--erro-texto);
-  background: var(--papel-quente);
-  color: var(--erro-texto);
-  font-weight: 500;
+/* Links in the text, like the form's "como usamos seus dados". */
+.notice a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.notice a:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
 }
 
 /* Coming and going: from the right and back, quick to arrive and long to

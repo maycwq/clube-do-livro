@@ -55,11 +55,9 @@ create table if not exists request_log (
 
 create index if not exists request_log_client_key_created_at on request_log (client_key, created_at);
 
--- v1 is the first wording, never published. v2 adds the privacy notice; who
--- organizes the club and the contact channel still have to be filled in
--- before answers are collected (README). A version can still be corrected
--- here while no response points to it; after that, any change needs a new
--- version.
+-- v1 is the first wording, never published. v2 adds the privacy notice. A
+-- version can still be corrected here while no response points to it; after
+-- that, any change needs a new version.
 insert into consent_texts as existing (version, contact, privacy, test_invite, notice) values (
   'v1',
   'ao enviar, você deixa a gente te chamar pelo WhatsApp sobre o clube. pra parar depois, é só avisar.',
@@ -74,7 +72,7 @@ insert into consent_texts as existing (version, contact, privacy, test_invite, n
   'como usamos seus dados
 a gente pede pouca coisa no formulário. aqui vai, rapidinho, o que faz com ela.
 quem organiza
-o clube é organizado por [IDENTIFICAÇÃO DOS RESPONSÁVEIS]. somos nós que recebemos as respostas e cuidamos delas.
+o clube é organizado por maycon e luy. somos nós que recebemos as respostas e cuidamos delas.
 por que pedimos seu nome e seu WhatsApp
 pra te chamar quando os detalhes do clube estiverem definidos, contar como vai funcionar e saber se você ainda tá a fim. ninguém entra em grupo sem combinar. as respostas sobre interesse e formato ajudam a gente a planejar os encontros.
 tudo fica guardado num banco de dados que só a gente acessa. não usamos cookies nem ferramentas de análise, e não repassamos suas respostas pra ninguém.
@@ -83,7 +81,7 @@ marcar “sim, me chama pra testar também” é opcional e não muda nada na su
 por quanto tempo
 a gente guarda as respostas só enquanto organiza o clube pra 2027. quando chamar as pessoas, quem não quiser seguir sai da lista; e se o clube não acontecer em 2027, a gente apaga tudo.
 pra parar, corrigir ou apagar
-é só avisar por [CANAL DE CONTATO PARA PRIVACIDADE] ou responder a nossa mensagem no WhatsApp. a gente confirma que o pedido veio do seu número e para de te chamar, corrige ou apaga o que você mandou, inclusive das cópias que tivermos.'
+pra tirar dúvidas sobre seus dados, pedir pra corrigir ou apagar suas respostas ou deixar de receber mensagens, é só falar com a gente no Instagram ou responder a nossa mensagem no WhatsApp. a gente confirma que o número é seu e para de te chamar, corrige ou apaga o que você mandou, inclusive das cópias que tivermos.'
 )
 on conflict (version) do update set
   contact = excluded.contact,

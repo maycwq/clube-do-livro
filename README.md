@@ -4,7 +4,7 @@ The interest form for a book club that should start in 2027, with monthly meetin
 
 At this stage the club only wants to know who would join and how to reach them once the details are settled. **It isn't an enrollment.** The form asks two single-choice questions (interest in the club, and whether the person could join in person, online or both), a name or nickname, a WhatsApp number, and offers a separate, optional invitation to test a digital experience related to the club.
 
-> **status:** working end to end and ready to deploy; not collecting answers yet. The page reproduces the approved Figma screens on mobile and desktop, validates the answers, stores them in Postgres and confirms only after they're recorded. Two items of the privacy notice still depend on the organizers, and answers should only be collected once they're filled in (see [before collecting answers](#before-collecting-answers)).
+> **status:** working end to end and ready to deploy; not collecting answers yet. The page reproduces the approved Figma screens on mobile and desktop, validates the answers, stores them in Postgres and confirms only after they're recorded. The privacy notice is complete; answers start being collected when the database is connected (see [deploy on Vercel](#deploy-on-vercel)).
 
 ## design source
 
@@ -153,19 +153,12 @@ Motion comes in two layers. The page's own (`motion.css`) is rare: when it opens
 - **Fraunces** (SIL Open Font License) comes from `@fontsource-variable/fraunces` with all its axes, since the file sets `SOFT 0` and `WONK 1`.
 - **Satoshi** (ITF Free Font License, [Fontshare](https://www.fontshare.com/fonts/satoshi)) can be self-hosted on our own site but not redistributed through a repository, so it isn't committed. `scripts/fetch-satoshi.mjs` downloads the official package before `dev` and `build` and extracts the three `.woff2` files used (Regular, Medium, Bold) into `src/assets/fonts/satoshi/`, unmodified. The build serves them from our domain. `public/og.jpg` is an image rendered with both, which the licenses allow.
 
-## before collecting answers
+## changing the privacy notice
 
-The privacy notice has two items only the organizers can provide. In the drawer in `index.html` they are marked `<mark class="pending" data-pending>` and show as visibly pending, never as real information:
+The notice is the drawer in `index.html`: the club is organized by maycon e luy, and questions or requests to correct, delete or stop messages go to olue's Instagram ([@comolue](https://www.instagram.com/comolue/)) or in reply to the club's WhatsApp message. Its exact text is part of the consent record, so to change it:
 
-- `[IDENTIFICAÇÃO DOS RESPONSÁVEIS]`: who organizes the club and answers for the data;
-- `[CANAL DE CONTATO PARA PRIVACIDADE]`: where to ask to stop, correct or delete before the club has messaged anyone (an e-mail or a number).
-
-They don't stop the build: the site can be deployed and reviewed with them pending. Answers should only be collected once both are filled in, so connect the database (which is what turns collection on) and share the link only after that.
-
-To fill them in:
-
-1. Replace each `<mark …>[…]</mark>` in the notice in `index.html` with the final text.
-2. Run `npm test`. `shared/copy.test.ts` fails and prints the notice as it now reads; paste it as the `notice` of version `v2` in `db/schema.sql`. Version `v2` can still be corrected because nobody has seen it yet; once the form is public, any change to the texts needs a new version (`v3` in `db/schema.sql`, `shared/interest.ts` and `data-consent-version` in `index.html`).
+1. Edit the notice in `index.html`.
+2. Run `npm test`. `shared/copy.test.ts` fails and prints the notice as it now reads; paste it as the `notice` of version `v2` in `db/schema.sql`. Version `v2` can still be corrected because no answer points to it yet; once answers are being collected, any change to the texts needs a new version (`v3` in `db/schema.sql`, `shared/interest.ts` and `data-consent-version` in `index.html`).
 3. If the database was created before this, run `db/schema.sql` again: it updates the wording of a version only while no response points to it.
 
 ## deploy on Vercel
@@ -173,7 +166,7 @@ To fill them in:
 The pages are static and the API is one Vercel Function; the database is Neon, which Vercel offers as a native integration. Nothing here needs a paid plan.
 
 1. **Import the repository** in Vercel (Add New → Project), with `main` as the production branch. `vercel.json` sets the Vite preset, `npm run build` and `dist`, so whatever the project settings say, the build is the same.
-2. **Fill in the privacy notice** (above) before going further: the next step turns collection on.
+2. **Read the privacy notice** on the deployed page before going further: the next step turns collection on.
 3. **Add the database**: Storage → Create Database → Neon (or connect an existing Neon project), in the **São Paulo (aws-sa-east-1)** region, next to the function (`vercel.json` pins functions to `gru1`). The integration adds `DATABASE_URL`. Keep it on **Production** only: preview deployments shouldn't write to the real list, and a Neon branch made for a preview starts as a copy of everyone's answers.
 4. **Create the tables** once: in Neon's console, SQL Editor, paste `db/schema.sql` and run it. Or, from a machine with the connection string in `.env.local`, run `npm run db:migrate`.
 5. **Deploy** and send one test answer from the published page. Check it under Tables → `responses`, then delete it (see below).
