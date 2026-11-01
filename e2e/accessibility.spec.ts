@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { confirmation, contrast, fill, holdLight, phone, rgb, settled, submitButton, worstContrastUnderText } from './helpers.js';
+import { confirmation, contrast, farFromTheSun, fill, holdLight, nearTheSun, phone, pointAtPanel, rgb, settled, submitButton, worstContrastUnderText } from './helpers.js';
 
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 // Audited as read: once what arrives has arrived (axe counts the opacity of
@@ -110,6 +110,14 @@ test.describe('contrast', () => {
           ['.opening__epilogue', normal],
         ];
         await expectReadableOverLight(page, texts, `${width} × ${height}`);
+        // The sun answering the mouse at its strongest: flaring next to it,
+        // in ember far from it. On the panel where it's closest to the text.
+        if (width === 1240) {
+          await pointAtPanel(page, ...nearTheSun);
+          await expectReadableOverLight(page, texts, `${width} × ${height}, mouse near the sun`);
+          await pointAtPanel(page, ...farFromTheSun);
+          await expectReadableOverLight(page, texts, `${width} × ${height}, mouse far from the sun`);
+        }
       }
     } else {
       await page.goto('/');

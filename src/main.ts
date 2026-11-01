@@ -12,8 +12,10 @@ import { setupDrawer } from './drawer.js';
 import { setupInterestForm } from './form.js';
 import { setupLight } from './light.js';
 import { setupPanel } from './panel.js';
+import { setupSun } from './sun.js';
 
 setupInterestForm(document);
 setupDrawer(document);
 setupPanel(document);
 setupLight(document);
+setupSun(document);

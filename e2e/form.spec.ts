@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { confirmation, fill, optInNote, phone, stored, submitButton } from './helpers.js';
+import { confirmation, farFromTheSun, fill, nearTheSun, optInNote, phone, pointAtPanel, settled, stored, submitButton } from './helpers.js';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
@@ -643,6 +643,49 @@ test.describe('motion', () => {
       expect(arrival.properties).toEqual(['opacity']);
       expect(arrival.duration).toBeLessThanOrEqual(200);
     }
+  });
+
+  test('on wide screens the sun answers the mouse over the panel, and settles when it leaves', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'the sun is on the wide panel, for a mouse');
+    await page.goto('/');
+    await settled(page);
+    const opacity = (selector: string) => page.locator(selector).evaluate((element) => Number(getComputedStyle(element).opacity));
+
+    // Near the sun the light flares.
+    await pointAtPanel(page, ...nearTheSun);
+    await expect.poll(() => opacity('.sun__flare')).toBeGreaterThan(0.5);
+    expect(await opacity('.sun__ember')).toBe(0);
+
+    // Away from it, the hour lowers into ember; only transform and opacity
+    // change, through transitions.
+    await pointAtPanel(page, ...farFromTheSun);
+    const moving = await page.evaluate(() =>
+      document
+        .getAnimations()
+        .filter((animation) => animation instanceof CSSTransition && (animation.effect as KeyframeEffect).target?.closest('.light'))
+        .map((animation) => (animation as CSSTransition).transitionProperty),
+    );
+    expect(moving.length).toBeGreaterThan(0);
+    expect(new Set(moving)).toEqual(new Set(['translate', 'transform', 'opacity']));
+    await expect.poll(() => opacity('.sun__ember')).toBeGreaterThan(0.5);
+    await expect.poll(() => opacity('.sun__flare')).toBe(0);
+
+    // Leaving the panel, it goes back to its own motion.
+    const box = (await page.locator('.opening').boundingBox())!;
+    await page.mouse.move(box.x + box.width + 200, box.y + 300);
+    await expect.poll(() => opacity('.sun__ember')).toBe(0);
+    expect(await page.locator('.sun').getAttribute('style')).toBeFalsy();
+  });
+
+  test("with reduced motion the sun doesn't answer the mouse", async ({ page, isMobile }) => {
+    test.skip(isMobile, 'the sun is on the wide panel, for a mouse');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+    const box = (await page.locator('.opening').boundingBox())!;
+    await page.mouse.move(box.x + box.width - 170, box.y + 40, { steps: 4 });
+    await page.evaluate(() => new Promise(requestAnimationFrame));
+    expect(await page.locator('.sun').getAttribute('style')).toBeFalsy();
+    expect(await page.locator('.sun__flare').evaluate((element) => getComputedStyle(element).opacity)).toBe('0');
   });
 
   test('the light stops when it is out of view and goes on when it is back', async ({ page, isMobile }) => {

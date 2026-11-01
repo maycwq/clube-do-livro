@@ -49,13 +49,14 @@ export async function settled(page: Page) {
 /**
  * Stops every light animation at the same point (0 to 1) of its own cycle,
  * from its resting value to the other end, and lets the page's own
- * arrivals finish.
+ * arrivals and the sun's answer to the mouse finish.
  */
 export async function holdLight(page: Page, phase: number) {
   await page.evaluate((phase) => {
     for (const animation of document.getAnimations()) {
       const target = (animation.effect as KeyframeEffect).target;
-      if (!target?.closest('.light')) {
+      // The sun answering the mouse: to where it's going.
+      if (!target?.closest('.light') || animation instanceof CSSTransition) {
         animation.finish();
         continue;
       }
@@ -67,6 +68,18 @@ export async function holdLight(page: Page, phase: number) {
     }
   }, phase);
 }
+
+/** Moves the mouse over the desktop panel and waits for the sun to take it in. */
+export async function pointAtPanel(page: Page, x: (box: { width: number; height: number }) => number, y: (box: { width: number; height: number }) => number) {
+  const box = (await page.locator('.opening').boundingBox())!;
+  await page.mouse.move(box.x + x(box), box.y + y(box), { steps: 4 });
+  // The sun reads the pointer once a frame.
+  await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+  await page.waitForFunction(() => document.querySelector<HTMLElement>('.sun')!.style.getPropertyValue('--glare') !== '');
+}
+
+export const nearTheSun = [(box: { width: number }) => box.width - 170, () => 40] as const;
+export const farFromTheSun = [() => 60, (box: { height: number }) => box.height - 40] as const;
 
 export const submitButton = (page: Page) => page.getByRole('button', { name: 'quero acompanhar o clube' });
 export const confirmation = (page: Page) => page.getByRole('heading', { level: 1, name: /anotado/ });
